@@ -804,7 +804,7 @@ function copyActive() {
     const idx = parseInt(activeView);
     if (!isNaN(idx)) {
       const s = sections[idx];
-      text = `【セクション：${s.name}】\n${buildSectionText(s)}`;
+      text = `では以下のセクションの画像生成をお願いします。\n\n【セクション：${s.name}】\n${buildSectionText(s)}`;
     }
   }
   navigator.clipboard.writeText(text).then(() => showToast('✓ コピーしました！ChatGPTに貼り付けてください', 'success'));
