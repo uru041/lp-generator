@@ -716,16 +716,16 @@ function renderPresetBtns() {
 function buildLayer2Text() {
   const l = layer2;
   let parts = [];
-  if (l.productName) parts.push(`商品名：${l.productName}`);
-  if (l.productDesc) parts.push(`内容・特徴：${l.productDesc}`);
-  if (l.strengths.length) parts.push(`訴求数字・強み：${l.strengths.join('　')}`);
-  if (l.targetAge || l.targetJob) parts.push(`ターゲット：${[l.targetAge, l.targetJob].filter(Boolean).join('、')}`);
-  if (l.targetWorries.length) parts.push(`ターゲットの悩み：${l.targetWorries.join('　')}`);
-  parts.push(`カラーパレット：メイン${l.colorMain}　サブ${l.colorSub}　アクセント${l.colorAccent}　背景${l.colorBg}　テキスト${l.colorText}`);
-  if (l.toneWords.length) parts.push(`トンマナ：${l.toneWords.join('　')}`);
-  if (l.toneNG.length) parts.push(`使用NG：${l.toneNG.join('　')}`);
-  if (l.notes) parts.push(`補足：${l.notes}`);
-  return parts.join('\n');
+  if (l.productName) parts.push(`【商品名】\n${l.productName}`);
+  if (l.productDesc) parts.push(`【内容・特徴】\n${l.productDesc}`);
+  if (l.strengths.length) parts.push(`【訴求数字・強み】\n${l.strengths.map(s => '・' + s).join('\n')}`);
+  if (l.targetAge || l.targetJob) parts.push(`【ターゲット】\n年齢：${l.targetAge || '未入力'}　職業：${l.targetJob || '未入力'}`);
+  if (l.targetWorries.length) parts.push(`【ターゲットの悩み】\n${l.targetWorries.map(s => '・' + s).join('\n')}`);
+  parts.push(`【カラーパレット】\nメイン：${l.colorMain}　サブ：${l.colorSub}　アクセント：${l.colorAccent}　背景：${l.colorBg}　テキスト：${l.colorText}`);
+  if (l.toneWords.length) parts.push(`【トンマナ】\n${l.toneWords.map(s => '・' + s).join('\n')}`);
+  if (l.toneNG.length) parts.push(`【使用NG】\n${l.toneNG.map(s => '・' + s).join('\n')}`);
+  if (l.notes) parts.push(`【補足】\n${l.notes}`);
+  return parts.join('\n\n');
 }
 
 function buildSectionText(s) {
@@ -802,7 +802,10 @@ function copyActive() {
       `以上がLP個別情報です。次に各セクションの情報を順番にお伝えします。「了解しました。セクション情報をお知らせください。」とだけ返答してください。まだ画像生成は行わないでください。`;
   } else {
     const idx = parseInt(activeView);
-    if (!isNaN(idx)) text = buildFullPrompt(idx);
+    if (!isNaN(idx)) {
+      const s = sections[idx];
+      text = `【セクション：${s.name}】\n${buildSectionText(s)}`;
+    }
   }
   navigator.clipboard.writeText(text).then(() => showToast('✓ コピーしました！ChatGPTに貼り付けてください', 'success'));
 }
@@ -856,4 +859,3 @@ function escHtml(str) {
 </script>
 </body>
 </html>
- 
