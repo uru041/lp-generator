@@ -618,6 +618,18 @@ function renderSectionForm(idx) {
     </div>
 
     <div class="segment">
+      <h3>📢 見出し・キャッチコピー</h3>
+      <div class="form-group">
+        <label class="form-label">見出し</label>
+        <input type="text" value="${escHtml(s.heading||'')}" oninput="sections[${idx}].heading=this.value;saveToStorage();renderPromptOutput()" placeholder="例：比べて納得！の合格率">
+      </div>
+      <div class="form-group">
+        <label class="form-label">キャッチコピー（任意）</label>
+        <input type="text" value="${escHtml(s.catchcopy||'')}" oninput="sections[${idx}].catchcopy=this.value;saveToStorage();renderPromptOutput()" placeholder="例：全国平均の4.0倍">
+      </div>
+    </div>
+
+    <div class="segment">
       <h3>🖼 ビジュアルイメージ</h3>
       <div class="form-group">
         <textarea rows="3" oninput="sections[${idx}].visual=this.value;saveToStorage();renderPromptOutput()" placeholder="人物・背景・グラフィック・構図など">${escHtml(s.visual||'')}</textarea>
@@ -775,6 +787,8 @@ function buildLayer2Text() {
 function buildSectionText(s) {
   let parts = [];
   if (s.purpose) parts.push(`【目的】${s.purpose}`);
+  if (s.heading) parts.push(`【見出し】${s.heading}`);
+  if (s.catchcopy) parts.push(`【キャッチコピー】${s.catchcopy}`);
   if (s.visual) parts.push(`【ビジュアル】${s.visual}`);
   if (s.bgColor) parts.push(`【このセクションの背景カラー】${s.bgColor}`);
   if (s.texts) parts.push(`【画像内テキスト】\n${s.texts}`);
