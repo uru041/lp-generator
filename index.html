@@ -883,7 +883,6 @@ async function generateImage(idx) {
         formData.append('image[]', new File([byteArr], `ref${i+1}.${ext}`, { type: img.mime }));
       });
       formData.append('size', apiSize);
-      formData.append('output_format', 'b64_json');
       formData.append('n', '1');
 
       const res = await fetch('https://api.openai.com/v1/images/edits', {
@@ -893,17 +892,34 @@ async function generateImage(idx) {
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
       const data = await res.json();
-      b64 = data.data?.[0]?.b64_json;
+      const imgUrl = data.data?.[0]?.url;
+      if (!imgUrl) throw new Error('画像URLが取得できませんでした');
+      // URLからbase64に変換
+      const imgRes = await fetch(imgUrl);
+      const blob = await imgRes.blob();
+      b64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(blob);
+      });
     } else {
       // 参考画像なし → generations API
       const res = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize, output_format: 'b64_json' })
+        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize })
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
       const data = await res.json();
-      b64 = data.data?.[0]?.b64_json;
+      const imgUrl = data.data?.[0]?.url;
+      if (!imgUrl) throw new Error('画像URLが取得できませんでした');
+      const imgRes = await fetch(imgUrl);
+      const blob = await imgRes.blob();
+      b64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(blob);
+      });
     }
 
     if (!b64) throw new Error('画像データが取得できませんでした');
