@@ -892,34 +892,28 @@ async function generateImage(idx) {
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
       const data = await res.json();
-      const imgUrl = data.data?.[0]?.url;
-      if (!imgUrl) throw new Error('画像URLが取得できませんでした');
-      // URLからbase64に変換
-      const imgRes = await fetch(imgUrl);
-      const blob = await imgRes.blob();
-      b64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
-      });
+      b64 = data.data?.[0]?.b64_json;
+      // b64_jsonがなければURLから取得
+      if (!b64 && data.data?.[0]?.url) {
+        const imgRes = await fetch(data.data[0].url);
+        const blob = await imgRes.blob();
+        b64 = await new Promise(resolve => { const r = new FileReader(); r.onload = () => resolve(r.result.split(',')[1]); r.readAsDataURL(blob); });
+      }
     } else {
       // 参考画像なし → generations API
       const res = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize })
+        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize, output_format: 'b64_json' })
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
       const data = await res.json();
-      const imgUrl = data.data?.[0]?.url;
-      if (!imgUrl) throw new Error('画像URLが取得できませんでした');
-      const imgRes = await fetch(imgUrl);
-      const blob = await imgRes.blob();
-      b64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
-      });
+      b64 = data.data?.[0]?.b64_json;
+      if (!b64 && data.data?.[0]?.url) {
+        const imgRes = await fetch(data.data[0].url);
+        const blob = await imgRes.blob();
+        b64 = await new Promise(resolve => { const r = new FileReader(); r.onload = () => resolve(r.result.split(',')[1]); r.readAsDataURL(blob); });
+      }
     }
 
     if (!b64) throw new Error('画像データが取得できませんでした');
