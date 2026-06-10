@@ -206,31 +206,33 @@
 
 <script>
 // ─── Default Layer 1 ───
-const DEFAULT_L1 = `あなたは「スマホLPデザインの専門家」兼「OpenAI画像生成モデルを熟知したプロフェッショナル」です。
-
-【画像生成ルール】
-- アスペクト比：スマホサイズの縦長「9:16」（追従CTAバナーのみ横長5:1）
-- スタイル：日本のトップクラス資格スクール／SaaSのプロデザイナーが2025年に制作した情報密度の高いプレミアムLPデザイン
+const DEFAULT_L1 = {
+  role: `あなたは「スマホLPデザインの専門家」兼「OpenAI画像生成モデルを熟知したプロフェッショナル」です。私が渡す情報をもとに、各セクションの高品質なLP画像を生成してください。`,
+  imageRules: `- アスペクト比：スマホサイズの縦長「9:16」（追従CTAバナーのみ横長5:1）
+- 品質：日本のトップクラス資格スクール／SaaSのプロデザイナーが2025年に制作した情報密度の高いプレミアムLPデザイン
+- 各セクションが単独でステークホルダーレビューに耐える完成度
 - フォント：全てゴシック体（Noto Sans JP相当）で日本語テキストを正確に描画
 - 重要数字（％、円、ヶ月等）はアクセントカラーで強調
-
-【禁止事項】
-- スカスカ・余白だけのスライド表紙的構成
+- 写真スタイル：実写ベース（合格者・講師は本物の表情）
+- グラフ：清潔感のあるフラットデザイン`,
+  prohibited: `- スカスカ・余白だけのスライド表紙的構成
+- 背景の過度な装飾
 - PowerPoint素材・無料テンプレート風
 - ストックフォト的な切り抜き合成感
 - チープな円グラフ・棒グラフ
 - 明朝体・サンセリフ系フォント
-
-【CTAボタン非描画ルール】
-画像内に描画しない要素：
+- 過剰な宣伝広告風`,
+  ctaRule: `【画像内に描画しない要素】
 - ボタン形状の図形（角丸矩形、押せそうな箱）
 - 行動喚起テキスト（「資料請求はこちら」「今すぐ申し込む」等）
 - ボタンを示唆する矢印アイコンや押下エフェクト
 
-画像内に描画してよい要素：
-- 見出し・サブ見出し・説明文
-- 訴求数字・統計・価格・キャンペーン文言
-- STEP表記・吹き出し・体験談`;
+【画像内に描画してよい要素】
+- 見出し・サブ見出し・説明文・吹き出し・体験談
+- 訴求数字・統計・商品名・価格・キャンペーン文言
+- STEP表記（STEP01〜03等）`,
+  other: ``
+};
 
 // ─── Section Presets ───
 const SECTION_PRESETS = [
@@ -317,7 +319,7 @@ const SECTION_PRESETS = [
 ];
 
 // ─── State ───
-let layer1 = DEFAULT_L1;
+let layer1 = { ...DEFAULT_L1 };
 let layer2 = {
   productName: '',
   productDesc: '',
@@ -354,7 +356,7 @@ function renderAll() {
 function loadFromStorage() {
   try {
     const d = JSON.parse(localStorage.getItem('lp_pb_data') || '{}');
-    if (d.layer1) layer1 = d.layer1;
+    if (d.layer1 && typeof d.layer1 === 'object') layer1 = { ...DEFAULT_L1, ...d.layer1 };
     if (d.layer2) layer2 = { ...layer2, ...d.layer2 };
     if (d.sections) sections = d.sections;
   } catch(e) {}
@@ -403,14 +405,47 @@ function showView(view) {
 
 // ─── Layer 1 Form ───
 function renderLayer1Form() {
+  const l = layer1;
   return `
     <div class="layer-badge badge-l1">Layer 1 — 全LP共通ルール</div>
     <p class="hint" style="margin-bottom:14px">全てのLPで共通して使う生成ルール・禁止事項です。通常は変更不要です。</p>
-    <div class="form-group">
-      <label class="form-label">ルール内容</label>
-      <textarea rows="20" oninput="layer1=this.value;saveToStorage();renderPromptOutput()">${escHtml(layer1)}</textarea>
+
+    <div class="segment">
+      <h3>🤖 AIへの役割設定</h3>
+      <div class="form-group">
+        <textarea rows="3" oninput="layer1.role=this.value;saveToStorage();renderPromptOutput()">${escHtml(l.role)}</textarea>
+      </div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="layer1=DEFAULT_L1;document.querySelector('#midBody textarea').value=DEFAULT_L1;saveToStorage();renderPromptOutput()">🔄 デフォルトに戻す</button>
+
+    <div class="segment">
+      <h3>🖼 画像生成ルール</h3>
+      <div class="form-group">
+        <textarea rows="7" oninput="layer1.imageRules=this.value;saveToStorage();renderPromptOutput()">${escHtml(l.imageRules)}</textarea>
+      </div>
+    </div>
+
+    <div class="segment">
+      <h3>🚫 禁止事項</h3>
+      <div class="form-group">
+        <textarea rows="7" oninput="layer1.prohibited=this.value;saveToStorage();renderPromptOutput()">${escHtml(l.prohibited)}</textarea>
+      </div>
+    </div>
+
+    <div class="segment">
+      <h3>🔘 CTAボタン非描画ルール</h3>
+      <div class="form-group">
+        <textarea rows="8" oninput="layer1.ctaRule=this.value;saveToStorage();renderPromptOutput()">${escHtml(l.ctaRule)}</textarea>
+      </div>
+    </div>
+
+    <div class="segment">
+      <h3>📝 その他・補足</h3>
+      <div class="form-group">
+        <textarea rows="3" placeholder="追加したいルールがあれば入力" oninput="layer1.other=this.value;saveToStorage();renderPromptOutput()">${escHtml(l.other)}</textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-ghost btn-sm" onclick="layer1={...DEFAULT_L1};saveToStorage();showView('layer1')">🔄 デフォルトに戻す</button>
   `;
 }
 
@@ -699,9 +734,20 @@ function buildSectionText(s) {
   return parts.join('\n\n');
 }
 
+function buildLayer1Text() {
+  const l = layer1;
+  let parts = [];
+  if (l.role) parts.push(`【役割】\n${l.role}`);
+  if (l.imageRules) parts.push(`【画像生成ルール】\n${l.imageRules}`);
+  if (l.prohibited) parts.push(`【禁止事項】\n${l.prohibited}`);
+  if (l.ctaRule) parts.push(`【CTAボタン非描画ルール】\n${l.ctaRule}`);
+  if (l.other) parts.push(`【補足】\n${l.other}`);
+  return parts.join('\n\n');
+}
+
 function buildFullPrompt(sectionIdx) {
   const s = sections[sectionIdx];
-  return `${layer1}\n\n${'─'.repeat(40)}\n【LP情報】\n${buildLayer2Text()}\n\n${'─'.repeat(40)}\n【セクション：${s.name}】\n${buildSectionText(s)}`;
+  return `${buildLayer1Text()}\n\n${'─'.repeat(40)}\n【LP情報】\n${buildLayer2Text()}\n\n${'─'.repeat(40)}\n【セクション：${s.name}】\n${buildSectionText(s)}`;
 }
 
 // ─── Render prompt output ───
@@ -711,7 +757,7 @@ function renderPromptOutput() {
     out.innerHTML = `
       <div class="prompt-layer">
         <div class="prompt-layer-label layer1-label">Layer 1 — 基本ルール</div>
-        <div class="prompt-text">${escHtml(layer1)}</div>
+        <div class="prompt-text">${escHtml(buildLayer1Text())}</div>
       </div>`;
   } else if (activeView === 'layer2') {
     out.innerHTML = `
@@ -727,7 +773,7 @@ function renderPromptOutput() {
       <div class="prompt-layer">
         <div class="prompt-layer-label layer1-label">Layer 1</div>
         <div class="prompt-text" style="max-height:120px;overflow:hidden;position:relative">
-          ${escHtml(layer1.substring(0,200))}...
+          ${escHtml(buildLayer1Text().substring(0,200))}...
           <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,var(--bg))"></div>
         </div>
       </div>
@@ -745,7 +791,7 @@ function renderPromptOutput() {
 // ─── Copy ───
 function copyActive() {
   let text = '';
-  if (activeView === 'layer1') text = layer1;
+  if (activeView === 'layer1') text = buildLayer1Text();
   else if (activeView === 'layer2') text = buildLayer2Text();
   else {
     const idx = parseInt(activeView);
