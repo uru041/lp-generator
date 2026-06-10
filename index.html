@@ -328,8 +328,12 @@ let layer2 = {
   targetWorries: [],
   colorMain: '#DC0107',
   colorSub: '#FF422E',
-  colorAccent: '#FF9589',
+  colorAccent1: '#FF9589',
+  colorAccent2: '',
+  colorAccent3: '',
+  colorAccent4: '',
   colorBg: '#E7E7E7',
+  colorBg2: '',
   colorText: '#333333',
   toneWords: [],
   toneNG: [],
@@ -507,32 +511,51 @@ function renderLayer2Form() {
         <div class="form-group">
           <label class="form-label">メインカラー</label>
           <div class="color-row">
-            <input type="color" value="${l.colorMain}" oninput="layer2.colorMain=this.value;document.getElementById('colorMainText').value=this.value;saveToStorage();renderPromptOutput()">
-            <input type="text" id="colorMainText" value="${l.colorMain}" oninput="layer2.colorMain=this.value;saveToStorage();renderPromptOutput()">
+            <input type="color" value="${l.colorMain||'#DC0107'}" oninput="layer2.colorMain=this.value;document.getElementById('colorMainText').value=this.value;saveToStorage();renderPromptOutput()">
+            <input type="text" id="colorMainText" value="${l.colorMain}" oninput="layer2.colorMain=this.value;saveToStorage();renderPromptOutput()" placeholder="#DC0107">
+            <button class="btn btn-ghost btn-sm" onclick="layer2.colorMain='';document.getElementById('colorMainText').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">サブカラー</label>
           <div class="color-row">
-            <input type="color" value="${l.colorSub}" oninput="layer2.colorSub=this.value;document.getElementById('colorSubText').value=this.value;saveToStorage();renderPromptOutput()">
-            <input type="text" id="colorSubText" value="${l.colorSub}" oninput="layer2.colorSub=this.value;saveToStorage();renderPromptOutput()">
+            <input type="color" value="${l.colorSub||'#FF422E'}" oninput="layer2.colorSub=this.value;document.getElementById('colorSubText').value=this.value;saveToStorage();renderPromptOutput()">
+            <input type="text" id="colorSubText" value="${l.colorSub}" oninput="layer2.colorSub=this.value;saveToStorage();renderPromptOutput()" placeholder="#FF422E">
+            <button class="btn btn-ghost btn-sm" onclick="layer2.colorSub='';document.getElementById('colorSubText').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
           </div>
         </div>
       </div>
-      <div class="form-row">
+      <label class="form-label" style="margin-bottom:8px">アクセントカラー（最大4色）</label>
+      ${[1,2,3,4].map(n => `
+      <div class="color-row" style="margin-bottom:8px">
+        <input type="color" value="${l['colorAccent'+n]||'#FF9589'}" oninput="layer2['colorAccent${n}']=this.value;document.getElementById('colorAccent${n}Text').value=this.value;saveToStorage();renderPromptOutput()">
+        <input type="text" id="colorAccent${n}Text" value="${l['colorAccent'+n]||''}" oninput="layer2['colorAccent${n}']=this.value;saveToStorage();renderPromptOutput()" placeholder="アクセント${n}（空欄で未使用）">
+        <button class="btn btn-ghost btn-sm" onclick="layer2['colorAccent${n}']='';document.getElementById('colorAccent${n}Text').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
+      </div>`).join('')}
+      <div class="form-row" style="margin-top:8px">
         <div class="form-group">
-          <label class="form-label">アクセントカラー</label>
+          <label class="form-label">デフォルト背景色</label>
           <div class="color-row">
-            <input type="color" value="${l.colorAccent}" oninput="layer2.colorAccent=this.value;document.getElementById('colorAccentText').value=this.value;saveToStorage();renderPromptOutput()">
-            <input type="text" id="colorAccentText" value="${l.colorAccent}" oninput="layer2.colorAccent=this.value;saveToStorage();renderPromptOutput()">
+            <input type="color" value="${l.colorBg||'#E7E7E7'}" oninput="layer2.colorBg=this.value;document.getElementById('colorBgText').value=this.value;saveToStorage();renderPromptOutput()">
+            <input type="text" id="colorBgText" value="${l.colorBg||''}" oninput="layer2.colorBg=this.value;saveToStorage();renderPromptOutput()" placeholder="#E7E7E7">
+            <button class="btn btn-ghost btn-sm" onclick="layer2.colorBg='';document.getElementById('colorBgText').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">背景色</label>
+          <label class="form-label">セカンド背景色</label>
           <div class="color-row">
-            <input type="color" value="${l.colorBg}" oninput="layer2.colorBg=this.value;document.getElementById('colorBgText').value=this.value;saveToStorage();renderPromptOutput()">
-            <input type="text" id="colorBgText" value="${l.colorBg}" oninput="layer2.colorBg=this.value;saveToStorage();renderPromptOutput()">
+            <input type="color" value="${l.colorBg2||'#FFFFFF'}" oninput="layer2.colorBg2=this.value;document.getElementById('colorBg2Text').value=this.value;saveToStorage();renderPromptOutput()">
+            <input type="text" id="colorBg2Text" value="${l.colorBg2||''}" oninput="layer2.colorBg2=this.value;saveToStorage();renderPromptOutput()" placeholder="空欄で未使用">
+            <button class="btn btn-ghost btn-sm" onclick="layer2.colorBg2='';document.getElementById('colorBg2Text').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
           </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">テキストカラー</label>
+        <div class="color-row">
+          <input type="color" value="${l.colorText||'#333333'}" oninput="layer2.colorText=this.value;document.getElementById('colorTextText').value=this.value;saveToStorage();renderPromptOutput()">
+          <input type="text" id="colorTextText" value="${l.colorText||''}" oninput="layer2.colorText=this.value;saveToStorage();renderPromptOutput()" placeholder="#333333">
+          <button class="btn btn-ghost btn-sm" onclick="layer2.colorText='';document.getElementById('colorTextText').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
         </div>
       </div>
     </div>
@@ -613,6 +636,16 @@ function renderSectionForm(idx) {
       <div class="form-group">
         <textarea rows="2" oninput="sections[${idx}].notes=this.value;saveToStorage();renderPromptOutput()" placeholder="レイアウト指定、強調箇所、参考画像の指示など">${escHtml(s.notes||'')}</textarea>
       </div>
+    </div>
+
+    <div class="segment">
+      <h3>🎨 このセクションの背景カラー（任意）</h3>
+      <div class="color-row">
+        <input type="color" value="${s.bgColor||'#FFFFFF'}" oninput="sections[${idx}].bgColor=this.value;document.getElementById('secBgText_${idx}').value=this.value;saveToStorage();renderPromptOutput()">
+        <input type="text" id="secBgText_${idx}" value="${s.bgColor||''}" oninput="sections[${idx}].bgColor=this.value;saveToStorage();renderPromptOutput()" placeholder="空欄でL2の背景色を使用">
+        <button class="btn btn-ghost btn-sm" onclick="sections[${idx}].bgColor='';document.getElementById('secBgText_${idx}').value='';saveToStorage();renderPromptOutput()" title="選択しない">✕</button>
+      </div>
+      <p class="hint">空欄の場合はL2で設定したデフォルト背景色が適用されます</p>
     </div>
   `;
 }
@@ -721,7 +754,18 @@ function buildLayer2Text() {
   if (l.strengths.length) parts.push(`【訴求数字・強み】\n${l.strengths.map(s => '・' + s).join('\n')}`);
   if (l.targetAge || l.targetJob) parts.push(`【ターゲット】\n年齢：${l.targetAge || '未入力'}　職業：${l.targetJob || '未入力'}`);
   if (l.targetWorries.length) parts.push(`【ターゲットの悩み】\n${l.targetWorries.map(s => '・' + s).join('\n')}`);
-  parts.push(`【カラーパレット】\nメイン：${l.colorMain}　サブ：${l.colorSub}　アクセント：${l.colorAccent}　背景：${l.colorBg}　テキスト：${l.colorText}`);
+
+  // カラー
+  let colors = [];
+  if (l.colorMain) colors.push(`メイン：${l.colorMain}`);
+  if (l.colorSub) colors.push(`サブ：${l.colorSub}`);
+  const accents = [l.colorAccent1, l.colorAccent2, l.colorAccent3, l.colorAccent4].filter(Boolean);
+  if (accents.length) colors.push(`アクセント：${accents.join('　')}`);
+  if (l.colorBg) colors.push(`デフォルト背景：${l.colorBg}`);
+  if (l.colorBg2) colors.push(`セカンド背景：${l.colorBg2}`);
+  if (l.colorText) colors.push(`テキスト：${l.colorText}`);
+  if (colors.length) parts.push(`【カラーパレット】\n${colors.join('\n')}`);
+
   if (l.toneWords.length) parts.push(`【トンマナ】\n${l.toneWords.map(s => '・' + s).join('\n')}`);
   if (l.toneNG.length) parts.push(`【使用NG】\n${l.toneNG.map(s => '・' + s).join('\n')}`);
   if (l.notes) parts.push(`【補足】\n${l.notes}`);
@@ -732,6 +776,7 @@ function buildSectionText(s) {
   let parts = [];
   if (s.purpose) parts.push(`【目的】${s.purpose}`);
   if (s.visual) parts.push(`【ビジュアル】${s.visual}`);
+  if (s.bgColor) parts.push(`【このセクションの背景カラー】${s.bgColor}`);
   if (s.texts) parts.push(`【画像内テキスト】\n${s.texts}`);
   if (s.notes) parts.push(`【補足・注意】${s.notes}`);
   return parts.join('\n\n');
