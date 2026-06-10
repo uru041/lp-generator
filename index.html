@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LP Section Generator — フォーサイト行政書士</title>
+<title>LP Section Generator — 資料請求LP</title>
 <style>
   :root {
     --bg: #0f0f13;
@@ -128,12 +128,19 @@
   .preset-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text2); cursor: pointer; text-align: left; width: 100%; margin-bottom: 6px; transition: all .2s; }
   .preset-btn:hover { border-color: var(--accent2); color: var(--text); }
   .preset-section { font-size: 10px; color: #FF422E; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+
+  .ref-img-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 12px; cursor: pointer; transition: all .2s; text-align: center; background: var(--bg); }
+  .ref-img-area:hover { border-color: var(--accent2); }
+  .ref-img-area.has-img { border-style: solid; border-color: var(--accent2); background: rgba(220,1,7,.04); }
+  .ref-img-filename { font-size: 12px; color: #FF9589; font-weight: 600; margin-top: 6px; word-break: break-all; }
+  .ref-img-thumb { width: 100%; max-height: 120px; object-fit: contain; border-radius: 6px; margin-top: 8px; display: block; }
+  .ref-img-hint { font-size: 11px; color: var(--text2); margin-top: 4px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>LP Generator <span>— フォーサイト行政書士</span></h1>
+  <h1>LP Generator <span>— 資料請求LP</span></h1>
   <div class="header-actions">
     <button class="btn btn-ghost btn-sm" onclick="showTab('settings-tab')">⚙ 設定</button>
     <button class="btn btn-ghost btn-sm" onclick="showMainView('lp-preview-view')">🖥 LPプレビュー</button>
@@ -188,11 +195,28 @@
           </div>
         </div>
         <div class="settings-section">
-          <h3>🎨 共通スタイルルール</h3>
+          <h3>🎨 共通スタイルルール（プロジェクト管理）</h3>
           <div class="form-group">
-            <textarea id="globalRules" rows="10" oninput="saveGlobalRules()"></textarea>
+            <label>プロジェクトを選択</label>
+            <div style="display:flex;gap:6px">
+              <select id="ruleProjectSelect" onchange="loadRuleProject()" style="flex:1"></select>
+              <button class="btn btn-ghost btn-sm" onclick="deleteRuleProject()" title="削除">🗑</button>
+            </div>
           </div>
-          <button class="btn btn-ghost btn-full btn-sm" onclick="resetGlobalRules()">🔄 デフォルトに戻す</button>
+          <div class="form-group">
+            <label>プロジェクト名</label>
+            <input type="text" id="ruleProjectName" placeholder="例：フォーサイト行政書士">
+          </div>
+          <div class="form-group">
+            <label>スタイルルール内容</label>
+            <textarea id="globalRules" rows="10"></textarea>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="saveRuleProject()">💾 保存</button>
+            <button class="btn btn-ghost btn-sm" onclick="applyRuleProject()">✅ 生成に適用</button>
+            <button class="btn btn-ghost btn-sm" onclick="newRuleProject()">＋ 新規作成</button>
+          </div>
+          <div id="activeRuleLabel" style="font-size:11px;color:#FF9589;margin-top:8px"></div>
         </div>
         <div class="settings-section">
           <h3>📦 データ管理</h3>
@@ -444,8 +468,29 @@ window.addEventListener('DOMContentLoaded', () => {
   const key = localStorage.getItem('lp_apikey') || '';
   document.getElementById('apiKeyInput').value = key;
   updateApiStatus(key);
-  const rules = localStorage.getItem('lp_globalrules');
-  document.getElementById('globalRules').value = rules !== null ? rules : DEFAULT_GLOBAL_RULES;
+  // 旧形式の共通ルールを移行
+  const oldRules = localStorage.getItem('lp_globalrules');
+  if (oldRules) {
+    const projects = loadRuleProjects();
+    if (!projects.find(p => p.name === 'デフォルト')) {
+      projects.unshift({ name: 'デフォルト', rules: oldRules });
+      saveRuleProjects(projects);
+      if (!getActiveRuleProjectName()) localStorage.setItem('lp_active_rule_project', 'デフォルト');
+    }
+  }
+  // フォーサイトプロジェクトを初期追加
+  const projects = loadRuleProjects();
+  if (projects.length === 0) {
+    projects.push({ name: 'フォーサイト行政書士', rules: DEFAULT_GLOBAL_RULES });
+    saveRuleProjects(projects);
+    localStorage.setItem('lp_active_rule_project', 'フォーサイト行政書士');
+  }
+  renderRuleProjectSelect();
+  const active = getActiveRuleProjectName();
+  if (active) {
+    const p = loadRuleProjects().find(x => x.name === active);
+    if (p) { document.getElementById('ruleProjectName').value = p.name; document.getElementById('globalRules').value = p.rules; }
+  }
   renderSectionList();
   renderPresetList();
 });
@@ -519,11 +564,88 @@ function updateApiStatus(key) {
   document.getElementById('apiDot').className = 'dot ' + (ok ? 'dot-ok' : 'dot-ng');
   document.getElementById('apiStatusText').textContent = ok ? '設定済み' : '未設定';
 }
-function saveGlobalRules() { localStorage.setItem('lp_globalrules', document.getElementById('globalRules').value); }
+// ─── Rule Projects ───
+function loadRuleProjects() {
+  try { return JSON.parse(localStorage.getItem('lp_rule_projects') || '[]'); } catch(e) { return []; }
+}
+function saveRuleProjects(projects) {
+  localStorage.setItem('lp_rule_projects', JSON.stringify(projects));
+}
+function getActiveRuleProjectName() {
+  return localStorage.getItem('lp_active_rule_project') || '';
+}
+function renderRuleProjectSelect() {
+  const projects = loadRuleProjects();
+  const active = getActiveRuleProjectName();
+  const sel = document.getElementById('ruleProjectSelect');
+  if (!sel) return;
+  sel.innerHTML = projects.length === 0
+    ? '<option value="">（プロジェクトなし）</option>'
+    : projects.map(p => `<option value="${escHtml(p.name)}" ${p.name === active ? 'selected' : ''}>${escHtml(p.name)}</option>`).join('');
+  updateActiveRuleLabel();
+}
+function updateActiveRuleLabel() {
+  const el = document.getElementById('activeRuleLabel');
+  const active = getActiveRuleProjectName();
+  if (el) el.textContent = active ? `✅ 現在の適用プロジェクト：${active}` : '未適用（生成時にルールが使われません）';
+}
+function loadRuleProject() {
+  const name = document.getElementById('ruleProjectSelect').value;
+  const projects = loadRuleProjects();
+  const p = projects.find(x => x.name === name);
+  if (p) {
+    document.getElementById('ruleProjectName').value = p.name;
+    document.getElementById('globalRules').value = p.rules;
+  }
+}
+function saveRuleProject() {
+  const name = document.getElementById('ruleProjectName').value.trim();
+  const rules = document.getElementById('globalRules').value.trim();
+  if (!name) { showToast('プロジェクト名を入力してください', 'error'); return; }
+  if (!rules) { showToast('ルール内容を入力してください', 'error'); return; }
+  const projects = loadRuleProjects();
+  const idx = projects.findIndex(x => x.name === name);
+  if (idx >= 0) { projects[idx].rules = rules; } else { projects.push({ name, rules }); }
+  saveRuleProjects(projects);
+  renderRuleProjectSelect();
+  document.getElementById('ruleProjectSelect').value = name;
+  showToast(`✓「${name}」を保存しました`, 'success');
+}
+function applyRuleProject() {
+  const name = document.getElementById('ruleProjectSelect').value;
+  if (!name) { showToast('プロジェクトを選択してください', 'error'); return; }
+  localStorage.setItem('lp_active_rule_project', name);
+  updateActiveRuleLabel();
+  showToast(`✅「${name}」を生成ルールとして適用しました`, 'success');
+}
+function newRuleProject() {
+  document.getElementById('ruleProjectName').value = '';
+  document.getElementById('globalRules').value = DEFAULT_GLOBAL_RULES;
+  document.getElementById('ruleProjectSelect').value = '';
+  showToast('新規プロジェクトを作成できます。名前を入力して保存してください');
+}
+function deleteRuleProject() {
+  const name = document.getElementById('ruleProjectSelect').value;
+  if (!name) return;
+  if (!confirm(`「${name}」を削除しますか？`)) return;
+  const projects = loadRuleProjects().filter(x => x.name !== name);
+  saveRuleProjects(projects);
+  if (getActiveRuleProjectName() === name) localStorage.removeItem('lp_active_rule_project');
+  renderRuleProjectSelect();
+  document.getElementById('ruleProjectName').value = '';
+  document.getElementById('globalRules').value = '';
+  showToast(`「${name}」を削除しました`);
+}
+function getActiveGlobalRules() {
+  const active = getActiveRuleProjectName();
+  if (!active) return DEFAULT_GLOBAL_RULES;
+  const projects = loadRuleProjects();
+  const p = projects.find(x => x.name === active);
+  return p ? p.rules : DEFAULT_GLOBAL_RULES;
+}
+function saveGlobalRules() { /* 旧関数・互換用 */ }
 function resetGlobalRules() {
   document.getElementById('globalRules').value = DEFAULT_GLOBAL_RULES;
-  localStorage.setItem('lp_globalrules', DEFAULT_GLOBAL_RULES);
-  showToast('デフォルトに戻しました', 'success');
 }
 
 // ─── Section management ───
@@ -562,6 +684,7 @@ function renderSectionList() {
         <div class="section-status ${cls}">${label}</div>
       </div>
       ${s.isBanner ? '<div class="section-prompt-preview" style="color:#FF9589">📏 横長バナーサイズ</div>' : ''}
+      ${(() => { const imgs = s.refImages || (s.refImageBase64 ? [s.refImageName] : []); return imgs.length > 0 ? `<div class="section-prompt-preview" style="color:#FF9589">📎 参考画像 ${imgs.length}枚: ${imgs.map(x => escHtml(typeof x === 'string' ? x : x.name)).join(', ')}</div>` : ''; })()}
     </div>`;
   }).join('');
 }
@@ -615,6 +738,29 @@ function renderEditor() {
       <label>追加ルール（このセクション専用・任意）</label>
       <textarea rows="2" oninput="updateSection('customRules', this.value)" placeholder="このセクション専用の追加指示があれば入力">${escHtml(s.customRules||'')}</textarea>
     </div>
+    <div class="form-group">
+      <label>参考画像（最大5枚・任意）</label>
+      <input type="file" id="refImgInput_${activeIdx}" accept="image/*" multiple style="display:none" onchange="handleRefImages(${activeIdx}, this)">
+      ${(() => {
+        const imgs = s.refImages || (s.refImageBase64 ? [{ base64: s.refImageBase64, mime: s.refImageMime, name: s.refImageName }] : []);
+        const slots = Array.from({ length: 5 }, (_, i) => imgs[i] || null);
+        return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          ${slots.map((img, i) => img ? `
+            <div class="ref-img-area has-img" style="position:relative">
+              <div class="ref-img-filename">📎 ${escHtml(img.name)}</div>
+              <img class="ref-img-thumb" src="data:${img.mime};base64,${img.base64}" alt="参考${i+1}">
+              <button class="btn btn-danger btn-sm" style="margin-top:6px;width:100%" onclick="removeRefImageAt(${activeIdx},${i})">✕ 削除</button>
+            </div>
+          ` : `
+            <div class="ref-img-area" onclick="document.getElementById('refImgInput_${activeIdx}').click()" style="min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div style="font-size:18px">＋</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:4px">画像${i+1}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--text2)">jpg / png / webp 対応。複数選択可。${imgs.length > 0 ? `<span style="color:#FF9589">${imgs.length}枚設定済み</span>` : ''}</div>`;
+      })()}
+    </div>
     <div class="editor-actions">
       <button class="btn btn-primary" onclick="generateImage(${activeIdx})" id="genBtn_${activeIdx}" ${s.status==='generating'?'disabled':''}>
         ${s.status==='generating' ? '<span class="spinner"></span> 生成中...' : '🎨 画像生成'}
@@ -640,10 +786,54 @@ function updateSection(field, value) {
   saveToStorage();
 }
 
+function handleRefImages(idx, input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const existing = sections[idx].refImages || (sections[idx].refImageBase64 ? [{ base64: sections[idx].refImageBase64, mime: sections[idx].refImageMime, name: sections[idx].refImageName }] : []);
+  const remaining = 5 - existing.length;
+  const toAdd = files.slice(0, remaining);
+  if (toAdd.length === 0) { showToast('参考画像は最大5枚です', 'error'); return; }
+
+  let loaded = 0;
+  const newImgs = [...existing];
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      newImgs.push({ base64: e.target.result.split(',')[1], mime: file.type || 'image/jpeg', name: file.name });
+      loaded++;
+      if (loaded === toAdd.length) {
+        sections[idx].refImages = newImgs;
+        sections[idx].refImageBase64 = null; // 旧形式クリア
+        saveToStorage(); renderSectionList(); renderEditor();
+        showToast(`✓ 参考画像を${toAdd.length}枚追加しました（合計${newImgs.length}枚）`, 'success');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function removeRefImageAt(idx, imgIdx) {
+  const imgs = sections[idx].refImages || [];
+  imgs.splice(imgIdx, 1);
+  sections[idx].refImages = imgs;
+  saveToStorage(); renderEditor(); renderSectionList();
+  showToast('参考画像を削除しました');
+}
+
+function removeRefImage(idx) {
+  sections[idx].refImages = [];
+  sections[idx].refImageBase64 = null;
+  sections[idx].refImageMime = null;
+  sections[idx].refImageName = null;
+  saveToStorage(); renderEditor();
+  showToast('参考画像を削除しました');
+}
+
 // ─── Prompt builder ───
 function buildFullPrompt(idx) {
   const s = sections[idx];
-  const globalRules = (localStorage.getItem('lp_globalrules') || DEFAULT_GLOBAL_RULES).trim();
+  const globalRules = getActiveGlobalRules();
   let parts = [];
   parts.push(`あなたは日本のトップクラス資格スクールのプロLPデザイナーです。以下の仕様に基づき、高品質なLP画像を生成してください。`);
   parts.push(`【共通スタイルルール・ブランドガイドライン】\n${globalRules}`);
@@ -666,24 +856,57 @@ async function generateImage(idx) {
   sections[idx].status = 'generating';
   saveToStorage(); renderSectionList(); renderEditor();
 
+  const s = sections[idx];
   const prompt = buildFullPrompt(idx);
-  const size = sections[idx].size || '1024x1536';
-
-  // For banner size, use closest supported size
+  const size = s.size || '1024x1536';
   const apiSize = size === '1792x256' ? '1536x1024' : size;
 
   try {
-    const res = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize, output_format: 'b64_json' })
-    });
+    let b64;
 
-    if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
-    const data = await res.json();
-    const b64 = data.data?.[0]?.b64_json;
+    // 参考画像の統合（新形式refImages優先、旧形式refImageBase64にも対応）
+    const refImgs = s.refImages && s.refImages.length > 0 ? s.refImages
+      : s.refImageBase64 ? [{ base64: s.refImageBase64, mime: s.refImageMime || 'image/jpeg', name: s.refImageName || '参考画像' }]
+      : [];
+
+    if (refImgs.length > 0) {
+      // 参考画像あり → edits APIで送信
+      const nameList = refImgs.map(r => r.name).join('、');
+      const formData = new FormData();
+      formData.append('model', 'gpt-image-1');
+      formData.append('prompt', prompt + `\n\n【参考画像について】添付の参考画像（${nameList}）のレイアウト・構図・雰囲気を参考にしてデザインしてください。`);
+      refImgs.forEach((img, i) => {
+        const ext = img.mime.includes('png') ? 'png' : 'jpg';
+        const byteChars = atob(img.base64);
+        const byteArr = new Uint8Array(byteChars.length);
+        for (let j = 0; j < byteChars.length; j++) byteArr[j] = byteChars.charCodeAt(j);
+        formData.append('image[]', new File([byteArr], `ref${i+1}.${ext}`, { type: img.mime }));
+      });
+      formData.append('size', apiSize);
+      formData.append('output_format', 'b64_json');
+      formData.append('n', '1');
+
+      const res = await fetch('https://api.openai.com/v1/images/edits', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}` },
+        body: formData
+      });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
+      const data = await res.json();
+      b64 = data.data?.[0]?.b64_json;
+    } else {
+      // 参考画像なし → generations API
+      const res = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize, output_format: 'b64_json' })
+      });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
+      const data = await res.json();
+      b64 = data.data?.[0]?.b64_json;
+    }
+
     if (!b64) throw new Error('画像データが取得できませんでした');
-
     sections[idx].imageBase64 = b64;
     sections[idx].status = 'done';
     saveToStorage(); renderSectionList(); renderEditor();
@@ -723,10 +946,10 @@ function exportLP() {
     if (!s.imageBase64) return `<!-- ${i+1}. ${s.name} - 未生成 -->`;
     return `  <!-- ${i+1}. ${s.name} -->\n  <img src="data:image/png;base64,${s.imageBase64}" alt="${escHtml(s.name)}" style="width:100%;display:block;">`;
   }).join('\n');
-  const html = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1.0">\n  <title>フォーサイト行政書士LP</title>\n  <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;max-width:390px;margin:0 auto}img{width:100%;display:block}</style>\n</head>\n<body>\n${imagesHtml}\n</body>\n</html>`;
+  const html = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1.0">\n  <title>資料請求LP</title>\n  <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;max-width:390px;margin:0 auto}img{width:100%;display:block}</style>\n</head>\n<body>\n${imagesHtml}\n</body>\n</html>`;
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'foresight-lp.html'; a.click();
+  const a = document.createElement('a'); a.href = url; a.download = 'lp-export.html'; a.click();
   URL.revokeObjectURL(url);
   showToast('✓ HTMLをエクスポートしました', 'success');
 }
@@ -735,7 +958,7 @@ function exportData() {
   const data = { version: 2, globalRules: localStorage.getItem('lp_globalrules') || '', sections };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `foresight-lp-${Date.now()}.json`; a.click();
+  const a = document.createElement('a'); a.href = url; a.download = `lp-project-${Date.now()}.json`; a.click();
   URL.revokeObjectURL(url);
   showToast('✓ プロジェクトを保存しました', 'success');
 }
