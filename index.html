@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LP セクション生成ツール</title>
+<title>LP Section Generator — フォーサイト行政書士</title>
 <style>
   :root {
     --bg: #0f0f13;
     --surface: #1a1a22;
     --surface2: #22222e;
     --border: #2e2e3e;
-    --accent: #7c6aff;
-    --accent2: #a594ff;
+    --accent: #A81417;
+    --accent2: #DC0107;
+    --accent3: #FF422E;
     --text: #e8e6f0;
     --text2: #9591a8;
     --success: #4ade80;
@@ -21,126 +22,36 @@
     --font: 'Inter', 'Hiragino Sans', 'Meiryo', sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 14px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; display: flex; flex-direction: column; }
 
-  /* ── Header ── */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
   header h1 { font-size: 16px; font-weight: 700; letter-spacing: .03em; }
-  header h1 span { color: var(--accent2); }
+  header h1 span { color: #FF422E; }
   .header-actions { display: flex; gap: 8px; }
 
-  /* ── Layout ── */
-  .layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    flex: 1;
-    overflow: hidden;
-    height: calc(100vh - 56px);
-  }
+  .layout { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; height: calc(100vh - 56px); }
 
-  /* ── Left Panel ── */
-  .left-panel {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .panel-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .tab {
-    flex: 1;
-    padding: 12px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--text2);
-    transition: all .2s;
-    border-bottom: 2px solid transparent;
-  }
-  .tab.active {
-    color: var(--accent2);
-    border-bottom-color: var(--accent);
-  }
-  .panel-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-  }
+  .left-panel { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tab { flex: 1; padding: 12px; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text2); transition: all .2s; border-bottom: 2px solid transparent; }
+  .tab.active { color: #FF422E; border-bottom-color: #A81417; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 16px; }
   .panel-content { display: none; }
   .panel-content.active { display: block; }
 
-  /* ── Form elements ── */
-  label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-bottom: 6px;
-  }
-  input[type="text"], input[type="password"], textarea, select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 13px;
-    padding: 9px 12px;
-    transition: border-color .2s;
-    outline: none;
-    resize: vertical;
-  }
-  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  input[type="text"], input[type="password"], textarea, select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 13px; padding: 9px 12px; transition: border-color .2s; outline: none; resize: vertical; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent2); }
   textarea { min-height: 80px; line-height: 1.5; }
   .form-group { margin-bottom: 14px; }
   .form-row { display: flex; gap: 8px; }
   .form-row .form-group { flex: 1; }
 
-  /* ── Buttons ── */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all .2s;
-    white-space: nowrap;
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent2); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; white-space: nowrap; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover { background: var(--accent3); }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent2); }
   .btn-danger { background: transparent; color: var(--danger); border: 1px solid transparent; }
   .btn-danger:hover { border-color: var(--danger); background: rgba(248,113,113,.1); }
   .btn-success { background: var(--success); color: #000; }
@@ -149,219 +60,63 @@
   .btn:disabled { opacity: .4; cursor: not-allowed; }
   .btn-full { width: 100%; }
 
-  /* ── Section list ── */
   .section-list { display: flex; flex-direction: column; gap: 8px; }
-  .section-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px;
-    cursor: pointer;
-    transition: all .2s;
-    position: relative;
-  }
-  .section-card:hover { border-color: var(--accent); }
-  .section-card.active { border-color: var(--accent); background: rgba(124,106,255,.08); }
-  .section-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .section-number {
-    width: 22px;
-    height: 22px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
+  .section-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; cursor: pointer; transition: all .2s; }
+  .section-card:hover { border-color: var(--accent2); }
+  .section-card.active { border-color: var(--accent2); background: rgba(220,1,7,.08); }
+  .section-card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .section-number { width: 22px; height: 22px; background: var(--accent2); color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .section-name { font-weight: 600; font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .section-status {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 20px;
-    font-weight: 600;
-  }
+  .section-status { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
   .status-done { background: rgba(74,222,128,.15); color: var(--success); }
   .status-pending { background: rgba(251,191,36,.12); color: var(--warn); }
-  .status-generating { background: rgba(124,106,255,.15); color: var(--accent2); }
+  .status-generating { background: rgba(220,1,7,.15); color: #FF422E; }
   .section-prompt-preview { font-size: 11px; color: var(--text2); margin-top: 6px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .section-actions { display: flex; gap: 4px; margin-top: 8px; }
-  .drag-handle { cursor: grab; color: var(--text2); padding: 2px; }
 
-  /* ── Right Panel ── */
-  .right-panel {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: var(--bg);
-  }
-  .right-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
+  .right-panel { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+  .right-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .right-header h2 { font-size: 14px; font-weight: 700; }
-  .right-body {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
+  .right-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 
-  /* ── Editor ── */
-  .editor-pane {
-    padding: 20px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
+  .editor-pane { padding: 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .editor-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 
-  /* ── Preview ── */
-  .preview-pane {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-    overflow-y: auto;
-  }
-  .preview-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    align-self: flex-start;
-  }
-  .preview-img-wrap {
-    width: 100%;
-    max-width: 600px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    position: relative;
-  }
-  .preview-img-wrap img {
-    width: 100%;
-    display: block;
-  }
-  .preview-placeholder {
-    width: 100%;
-    max-width: 600px;
-    background: var(--surface);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 20px;
-    color: var(--text2);
-    gap: 8px;
-    font-size: 13px;
-  }
+  .preview-pane { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; overflow-y: auto; }
+  .preview-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; align-self: flex-start; }
+  .preview-img-wrap { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .preview-img-wrap.banner-wrap { max-width: 600px; }
+  .preview-img-wrap img { width: 100%; display: block; }
+  .preview-placeholder { width: 100%; max-width: 400px; background: var(--surface); border: 2px dashed var(--border); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; color: var(--text2); gap: 8px; font-size: 13px; }
   .preview-placeholder .icon { font-size: 32px; }
 
-  /* ── LP Preview (full) ── */
-  .lp-preview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    gap: 0;
-  }
-  .lp-section-img {
-    width: 100%;
-    max-width: 600px;
-    display: block;
-  }
-  .lp-section-wrap { width: 100%; max-width: 600px; position: relative; }
-  .lp-section-overlay {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,.65);
-    color: #fff;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-  }
+  .lp-preview { display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 0; }
+  .lp-section-img { width: 100%; max-width: 390px; display: block; }
+  .lp-section-wrap { width: 100%; max-width: 390px; position: relative; }
+  .lp-section-wrap.banner-wrap { max-width: 600px; }
+  .lp-section-overlay { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.65); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
 
-  /* ── Generating spinner ── */
-  .spinner {
-    display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Toast ── */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    z-index: 9999;
-    transition: transform .3s;
-    pointer-events: none;
-  }
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 9999; transition: transform .3s; pointer-events: none; }
   #toast.show { transform: translateX(-50%) translateY(0); }
   #toast.success { border-color: var(--success); color: var(--success); }
   #toast.error { border-color: var(--danger); color: var(--danger); }
 
-  /* ── Settings ── */
-  .settings-section {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    margin-bottom: 12px;
-  }
-  .settings-section h3 { font-size: 12px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  .settings-section { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+  .settings-section h3 { font-size: 12px; font-weight: 700; color: #FF422E; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
   .api-status { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 6px; }
   .dot { width: 7px; height: 7px; border-radius: 50%; }
   .dot-ok { background: var(--success); }
   .dot-ng { background: var(--danger); }
 
-  /* ── Size selector ── */
-  .size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .size-opt {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px;
-    cursor: pointer;
-    text-align: center;
-    transition: all .2s;
-    font-size: 12px;
-  }
-  .size-opt.active { border-color: var(--accent); background: rgba(124,106,255,.1); color: var(--accent2); }
-  .size-opt .size-ratio { font-size: 18px; margin-bottom: 2px; }
+  .size-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .size-opt { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px; cursor: pointer; text-align: center; transition: all .2s; font-size: 11px; }
+  .size-opt.active { border-color: var(--accent2); background: rgba(220,1,7,.1); color: #FF422E; }
+  .size-opt .size-ratio { font-size: 16px; margin-bottom: 2px; }
 
-  /* ── Scrollbar ── */
+  .cta-banner-notice { background: rgba(255,66,46,.1); border: 1px solid rgba(255,66,46,.3); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #FF9589; margin-bottom: 12px; }
+
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -369,13 +124,16 @@
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text2); }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
   .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-  .badge { font-size: 10px; background: var(--accent); color: #fff; padding: 1px 6px; border-radius: 10px; font-weight: 700; }
+
+  .preset-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text2); cursor: pointer; text-align: left; width: 100%; margin-bottom: 6px; transition: all .2s; }
+  .preset-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .preset-section { font-size: 10px; color: #FF422E; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>LP <span>Section</span> Generator</h1>
+  <h1>LP Generator <span>— フォーサイト行政書士</span></h1>
   <div class="header-actions">
     <button class="btn btn-ghost btn-sm" onclick="showTab('settings-tab')">⚙ 設定</button>
     <button class="btn btn-ghost btn-sm" onclick="showMainView('lp-preview-view')">🖥 LPプレビュー</button>
@@ -384,23 +142,38 @@
 </header>
 
 <div class="layout">
-  <!-- Left Panel -->
   <div class="left-panel">
     <div class="panel-tabs">
       <div class="tab active" onclick="showTab('sections-tab')" id="sections-tab-btn">📋 セクション</div>
+      <div class="tab" onclick="showTab('presets-tab')" id="presets-tab-btn">⚡ プリセット</div>
       <div class="tab" onclick="showTab('settings-tab')" id="settings-tab-btn">⚙ 設定</div>
     </div>
     <div class="panel-body">
+
       <!-- Sections Tab -->
       <div class="panel-content active" id="sections-tab">
         <button class="btn btn-primary btn-full" style="margin-bottom:14px" onclick="addSection()">＋ セクション追加</button>
         <div class="section-list" id="sectionList">
           <div class="empty-state">
             <div class="icon">📄</div>
-            <div>セクションを追加して<br>LP制作を始めましょう</div>
+            <div>「⚡ プリセット」タブから<br>セクションを一括追加できます</div>
           </div>
         </div>
       </div>
+
+      <!-- Presets Tab -->
+      <div class="panel-content" id="presets-tab">
+        <div class="settings-section">
+          <h3>⚡ フォーサイト行政書士 全セクション</h3>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:12px">15セクション＋CTAバナーをまとめて追加します</p>
+          <button class="btn btn-primary btn-full" onclick="loadAllPresets()">全セクションを一括追加</button>
+        </div>
+        <div class="settings-section">
+          <h3>📋 個別追加</h3>
+          <div id="presetList"></div>
+        </div>
+      </div>
+
       <!-- Settings Tab -->
       <div class="panel-content" id="settings-tab">
         <div class="settings-section">
@@ -415,32 +188,11 @@
           </div>
         </div>
         <div class="settings-section">
-          <h3>📐 画像サイズ</h3>
-          <div class="size-grid" id="sizeGrid">
-            <div class="size-opt active" onclick="selectSize('1536x1024','横長 (1536×1024)')" data-size="1536x1024">
-              <div class="size-ratio">⬛</div>横長
-            </div>
-            <div class="size-opt" onclick="selectSize('1024x1536','縦長 (1024×1536)')" data-size="1024x1536">
-              <div class="size-ratio">▮</div>縦長
-            </div>
-            <div class="size-opt" onclick="selectSize('1024x1024','正方形 (1024×1024)')" data-size="1024x1024">
-              <div class="size-ratio">■</div>正方形
-            </div>
-          </div>
-          <p style="font-size:11px; color:var(--text2); margin-top:8px">現在: <span id="sizeLabel">横長 (1536×1024)</span></p>
-        </div>
-        <div class="settings-section">
-          <h3>🎨 共通ルール</h3>
+          <h3>🎨 共通スタイルルール</h3>
           <div class="form-group">
-            <label>全セクションに適用するスタイルルール</label>
-            <textarea id="globalRules" rows="6" placeholder="例：
-・ブランドカラー: #1A2E5A（ネイビー）、#F4A300（ゴールド）
-・フォント: モダンなサンセリフ
-・トンマナ: 高級感・信頼感
-・写真スタイル: リアル写真 / イラスト不可
-・必ずロゴエリアを左上に配置" oninput="saveGlobalRules()"></textarea>
+            <textarea id="globalRules" rows="10" oninput="saveGlobalRules()"></textarea>
           </div>
-          <button class="btn btn-ghost btn-full btn-sm" onclick="applyGlobalRulesToAll()">全セクションに再適用</button>
+          <button class="btn btn-ghost btn-full btn-sm" onclick="resetGlobalRules()">🔄 デフォルトに戻す</button>
         </div>
         <div class="settings-section">
           <h3>📦 データ管理</h3>
@@ -457,7 +209,6 @@
 
   <!-- Right Panel -->
   <div class="right-panel" id="rightPanel">
-    <!-- Editor View -->
     <div id="editor-view" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
       <div class="right-header">
         <h2 id="editorTitle">セクションを選択してください</h2>
@@ -471,7 +222,7 @@
         <div class="editor-pane" id="editorPane">
           <div class="empty-state">
             <div class="icon">👈</div>
-            <div>左のリストからセクションを選ぶか<br>「＋ セクション追加」で始めましょう</div>
+            <div>左の「⚡ プリセット」から<br>セクションを追加して始めましょう</div>
           </div>
         </div>
         <div class="preview-pane" id="previewPane" style="display:none">
@@ -481,10 +232,9 @@
       </div>
     </div>
 
-    <!-- LP Full Preview View -->
     <div id="lp-preview-view" style="display:none;flex-direction:column;height:100%;overflow:hidden">
       <div class="right-header">
-        <h2>🖥 LP全体プレビュー</h2>
+        <h2>🖥 LP全体プレビュー（スマホサイズ）</h2>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-sm" onclick="showMainView('editor-view')">← 編集に戻る</button>
           <button class="btn btn-success btn-sm" onclick="exportLP()">⬇ エクスポート</button>
@@ -500,44 +250,265 @@
 <div id="toast"></div>
 
 <script>
-// ─────────────────────────────────────────────
-// State
-// ─────────────────────────────────────────────
+// ─── Constants ───
+const DEFAULT_GLOBAL_RULES = `【商品情報】
+商品名：フォーサイト 行政書士通信講座（2026年試験対策）
+- 紙のフルカラーテキスト + eラーニング「ManaBun」 + eライブスタディの3本柱
+- 最短4ヵ月で合格を目指す通信講座
+- 合格率58.5%（2025年実績／全国平均の約4.0倍）
+- 累計受講者数45万人
+
+【ターゲット】
+30〜50代の働く社会人（男女）。独学挫折経験あり、時間がない、コスパ重視。
+
+【カラーパレット】
+- メイン：レッド #A81417, #DC0107
+- サブ：ブライトオレンジ #FF422E
+- アクセント：コーラルオレンジ #FF9589
+- 背景：ライトグレー #D8D8D8, #E7E7E7 / ホワイト #FFFFFF
+- テキスト：ブラック #333333
+- 使用禁止色：原色の青・緑・紫・鮮明なピンク
+
+【トンマナ】
+- 信頼感・誠実・専門性がありながら親しみやすい
+- 日本のトップクラスSaaS・資格スクールのプロデザイナーが2025年に制作したような情報密度の高いプレミアムLP
+- フォント：全てゴシック体（Noto Sans JP相当）
+- 写真：実写ベース（合格者・講師は本物の表情）
+- グラフ：清潔感のあるフラットデザイン
+
+【禁止事項】
+- 明朝体・サンセリフ系フォント
+- スカスカ・余白だけのスライド表紙的構成
+- PowerPoint素材・無料テンプレート風
+- ストックフォト的な切り抜き合成感
+- チープな円グラフ・棒グラフ
+- ビビッドすぎる追加色
+
+【CTAボタン非描画ルール】
+以下は画像内に絶対に描画しない：
+- ボタン形状の図形（角丸矩形、押せそうな箱）
+- 行動喚起テキスト（「資料請求はこちら」「今すぐ申し込む」等）
+- ボタンを示唆する矢印アイコンや押下エフェクト
+描画してよい要素：見出し・数字・商品名・価格・キャンペーン文言・STEP表記・説明文`;
+
+const SECTION_PRESETS = [
+  { id: 1, name: 'FV（ファストビュー）', type: 'hero', size: '1024x1536',
+    prompt: `【セクション1：ファストビュー】スマホLP用縦長画像（9:16）
+ビジュアル：30〜40代女性、ショートカット、ナチュラルで知的な雰囲気。テキスト（教材）を胸元に抱え、カメラ目線でこちらを見ている。表情：自信があり穏やかに微笑む。服装：清潔感のあるオフィスカジュアル。背景：明るい室内（ホワイト〜ライトグレー基調）。
+描画テキスト（全てゴシック体・Noto Sans JP）：
+- 「行政書士」（最上部・中サイズ）
+- 「合格率は全国平均の4.0倍！」（メインキャッチ・大サイズ・レッド）
+- 「不合格なら全額返金」（サブ）
+- 「スピード合格講座 54,800円〜」
+- 「最短合格実績 4ヶ月」
+下部：3つのアイコン付き訴求エリア（返金保証・価格・最短期間）を横並び配置。
+数字「4.0倍」は最大サイズで赤く強調。` },
+  { id: 2, name: '合格率比較', type: 'comparison', size: '1024x1536',
+    prompt: `【セクション2：合格率比較】スマホLP用縦長画像（9:16）
+見出し：「比べて納得！の合格率」
+キャッチ：「全国平均の4.0倍」
+メインビジュアル：フラットデザインのドーナツグラフ2つを並べて対比。
+- 左：全国平均「14.54%」（小さいグラフ・グレー系）
+- 右：フォーサイト「58.5%」（大きいグラフ・レッド）
+- 2つの間に「4.0倍！」を特大・レッドで強調表示
+注釈：「全額返金保証制度の確認テスト・学力テストの条件を満たした受講生のうち、受験番号を提出した合格者数で算出　※2025年度試験の実績」（小文字）` },
+  { id: 3, name: '不安解消＆強み', type: 'feature', size: '1024x1536',
+    prompt: `【セクション3：不安解消＆フォーサイトの強み】スマホLP用縦長画像（9:16）
+見出し：「通信講座・オンラインスクールで行政書士を目指したい。でも・・・」
+構成：悩み→解決を3セットで縦に配置。各セットに男性人物イラストまたは写真風。
+不安①「デジタル教材だけでは不安…」→「フォーサイトなら 暗記に効く紙のテキストも付与されるから 記憶に残りやすい！」
+不安②「学習時間が割けるか心配…」→「フォーサイトなら スキマ時間を無駄にしないeラーニング＋講座動画で 効率よく学べる！」
+不安③「高い受講料を払って、落ちたらどうしよう…」→「フォーサイトなら 万が一不合格でも、全額返金か翌年も無料受講！」
+最下部まとめキャッチ：「フォーサイトだからチャレンジできる／最短4ヶ月で行政書士への道！」（レッド強調）` },
+  { id: 4, name: '資料請求特典', type: 'benefit', size: '1024x1536',
+    prompt: `【セクション4：資料請求特典】スマホLP用縦長画像（9:16）
+見出し：「はじめの一歩、資料請求／3つの特典」
+特典3点を縦または横並びカード形式で表示：
+特典①「サンプル教材プレゼント」アイコン付き
+特典②「e-ラーニング無料試用版」アイコン付き
+特典③「書籍プレゼント」アイコン付き
+背景：ライトグレー。清潔感のあるフラットデザイン。各特典カードにレッドのアクセントライン。` },
+  { id: 5, name: '資料請求割引', type: 'discount', size: '1024x1536',
+    prompt: `【セクション5：資料請求割引】スマホLP用縦長画像（9:16）
+見出し：「資料請求でお届けする内容は、すぐにオンラインでも確認できます！」
+キャッチ：「さらに、資料請求すると「通常セット価格」から」
+強調：「10,000円割引」（特大・レッド・目立つ数字訴求デザイン）
+注釈（小文字）：「※キャンペーン実施時など、10,000円割引とならない場合があります　※クーポン等との併用はできません」
+価格例：「例えばバリューセット1の場合」「通常価格66,800円 → 56,800円（税込・送料別）」（打ち消し線で通常価格、レッドで割引後価格）` },
+  { id: 6, name: '実績訴求', type: 'achievement', size: '1024x1536',
+    prompt: `【セクション6：実績訴求】スマホLP用縦長画像（9:16）
+見出し：「働きながら目指す行政書士」
+サブ：「圧倒的な合格実績で選ばれています」
+メインビジュアル：スーツ姿の30〜40代男性（自信に満ちた表情、知的）
+強調数字：「累計受講者数　45万人」（特大・レッドまたはゴールド系アクセント）
+背景：ホワイト〜ライトグレー。信頼感のある構成。` },
+  { id: 7, name: 'CTA（中間）', type: 'cta', size: '1024x1536',
+    prompt: `【セクション7：CTA中間】スマホLP用縦長画像（9:16）
+見出し：「働きながらでも、最短４か月！」
+強調：「フォーサイト行政書士スピード合格講座」（レッド・特大文字）
+サブ：「まずは無料でサンプルをご覧ください」
+注意：CTAボタンは描画しない（HTML実装のため）。ボタン設置スペースとして下部に余白エリアを確保。
+背景：レッド系グラデーションまたはホワイト。前向き・意欲が高まるデザイン。` },
+  { id: 8, name: '3つの教材', type: 'feature', size: '1024x1536',
+    prompt: `【セクション8：3つの教材】スマホLP用縦長画像（9:16）
+見出し：「スピード合格への道！3つの教材」
+サブ：「フォーサイトのスピード行政書士合格講座」
+3つの柱（縦に順番に配置）：
+01「バツグンに記憶に残る「フルカラーテキスト」」：フルカラーの参考書イメージ。本文「合格点主義。色を論理的に使った紙のテキストは学習効果を高く、暗記もしやすい」。POINT「自分のペースで、漏れなく学べる」
+02「スキマ時間を最大限に活かす「eラーニング」」：スマホ学習イメージ。本文「空き時間や移動時間でも効率的に学習できます」。POINT「受講生満足度92%「ManaBun」」
+03「早く・深く・正確に理解するための「講義」」：講師講義イメージ。本文「専任講師による高品質の講義で、あなたを合格に導きます」。POINT「テキスト×講義で知識をインプット」
+各セクションに番号（01/02/03）をレッドで強調。` },
+  { id: 9, name: '安心保証', type: 'guarantee', size: '1024x1536',
+    prompt: `【セクション9：安心保証】スマホLP用縦長画像（9:16）
+見出し：「万が一、不合格でも安心。フォーサイトの安心保証」
+サブ：「だから、思い切って挑戦できる」
+2つの保証をカード形式で並列表示：
+保証①「全額返金保証」：所定の条件を満たしても不合格だった場合、受講料を全額返金。対象：バリューセット3。シールド・盾アイコン付き。
+保証②「翌年デジタルプラン無料」：所定の条件を満たしても不合格だった場合、翌年のデジタルプランを無料提供。対象：バリューセット1.2。
+注釈（小文字）：「※各保証には所定の適用条件があります。詳細は公式サイトをご確認ください。」
+背景：安心感を与えるホワイト〜ライトグレー。` },
+  { id: 10, name: '講師紹介', type: 'profile', size: '1024x1536',
+    prompt: `【セクション10：講師紹介】スマホLP用縦長画像（9:16）
+見出し：「私たちが驚異の合格率を支えます！フォーサイトの実力派講師」
+講師2名の紹介（縦並びまたは横並び）：
+講師①「福澤 繁樹 講師」：指導歴20年以上の男性講師。キャッチ「決めたらやるのみ、「絶対合格」」。プロフィール写真エリア（スーツ・自信に満ちた表情）。
+講師②「北川 えり子 講師」：丁寧な指導が好評の女性講師。キャッチ「最後まで一歩一歩頑張りましょう!!」。プロフィール写真エリア（親しみやすい笑顔）。
+各講師カードにレッドのアクセント。背景：ライトグレー。` },
+  { id: 11, name: '合格者インタビュー', type: 'testimonial', size: '1024x1536',
+    prompt: `【セクション11：合格者インタビュー】スマホLP用縦長画像（9:16）
+見出し：「フォーサイトで行政書士に合格！合格者インタビュー」
+メインビジュアル：合格証書を持った30〜40代男性（自然な笑顔・達成感）
+インタビューカード：
+タイトル：「挑戦！約900時間の勉強で一発合格」
+属性：「自営業　受講講座：バリューセット2　2022年試験対策」
+本文（吹き出し風）：「テキストは、サンプルを何社も取り寄せた中で一番だと思います。eライブスタディは講師に通学しているような感覚があり、モチベを保てていました。」
+スライダーインジケーター（複数枚あることを示すドット表示）。` },
+  { id: 12, name: '料金プラン', type: 'price', size: '1024x1536',
+    prompt: `【セクション12：料金プラン】スマホLP用縦長画像（9:16）
+見出し：「スピード合格の決定版！3つのバリューセット」
+補足：「すべて教育訓練給付制度 対象講座」（バッジ風）
+3つのプランを縦に配置（カード形式）：
+プラン①「バリューセット1」：内容「基礎講座＋過去問講座」、総額「66,800円」、保証「不合格だったら翌年デジタルプラン無料」
+プラン②「バリューセット2」：内容「基礎講座＋過去問講座＋直前対策講座」、総額「76,800円」、保証「不合格だったら翌年デジタルプラン無料」
+プラン③「バリューセット3」：「1番人気！」バッジ付き（レッド）。内容「基礎講座＋過去問講座＋直前対策講座＋答練講座＋過去問一問一答演習」、総額「94,800円〜」、保証「不合格だったら全額返金」（強調）
+最も人気のバリューセット3を視覚的に目立たせる（枠線太く・レッド背景ヘッダー）。` },
+  { id: 13, name: '合格特典', type: 'bonus', size: '1024x1536',
+    prompt: `【セクション13：合格特典】スマホLP用縦長画像（9:16）
+見出し：「見事合格された方！合格特典・お祝い金を進呈！」
+2つの特典を横並びカードで表示：
+特典①「バリューセット1.2」：「合格お祝い金　1万円進呈」（トロフィー・スター系アイコン）
+特典②「バリューセット3」：「受講料　50%の報奨金」（特大数字・レッド強調）
+注釈（小文字）：「※お祝い金・報奨金には適用条件があります。詳細は公式サイトをご確認ください。」
+背景：お祝い感のある明るいデザイン（ゴールド×レッドのアクセント）。` },
+  { id: 14, name: '申込み導線＆資料請求詳細', type: 'flow', size: '1024x1536',
+    prompt: `【セクション14：申込み導線＆資料請求詳細】スマホLP用縦長画像（9:16）
+見出し：「フォーサイトではじめるなら、今！」
+強調：「10,000円割引」（資料請求特典・特大レッド）
+注釈：「※キャンペーン実施時など10,000円割引とならない場合あり」
+価格例：「バリューセット3の場合：通常94,800円 → 84,800円（税込・送料別）」（打ち消し線）
+お申し込みの流れ（STEP表記）：
+STEP-01：資料請求フォームから必須項目を入力
+STEP-02：3日以内に特別割引メールをお送り
+STEP-03：メール記載URLから講座をお申し込み
+（注意：CTAボタンは描画しない）
+特典3点を再掲（コンパクト版）：
+特典1「サンプル教材プレゼント」
+特典2「eラーニング無料試用版（2週間）」
+特典3「ノウハウ書籍200ページプレゼント」` },
+  { id: 15, name: 'クロージング', type: 'closing', size: '1024x1536',
+    prompt: `【セクション15：クロージング】スマホLP用縦長画像（9:16）
+見出し：「合格への第一歩。」
+強調：「累計受講者数　45万人」（特大数字）
+キャッチ：「フォーサイトで今、はじめよう」（レッド・大）
+メインビジュアル：FVと同じ30〜40代女性（笑顔・前向き・教材を持つ）
+注意：CTAボタンは描画しない。ボタン設置スペースを下部に確保。
+全体的に前向き・達成感・希望を感じさせるデザイン。背景：ホワイト〜ライトグレー。` },
+  { id: 16, name: '追従CTAバナー', type: 'cta_banner', size: '1792x256',
+    isBanner: true,
+    prompt: `【追従CTAバナー】横長バナー（約5:1比率・800×160px相当）スマホ画面下部固定表示用
+仕様：
+- 背景：白ベース＋上端にうっすら影、またはディープレッド系グラデーション
+- 中央〜左寄りに「資料請求はこちら」のブラック系角丸ボタン形状（立体感あり）
+- 右側に補助テキスト「カンタン1分で完了 ▶」（小文字）
+- フォーサイトブランドカラー（レッド系）と統一
+- シンプル・クリーン・クリックしたくなるデザイン` },
+];
+
+// ─── State ───
 let sections = [];
 let activeIdx = null;
-let selectedSize = '1536x1024';
-let selectedSizeLabel = '横長 (1536×1024)';
 
-// ─────────────────────────────────────────────
-// Init
-// ─────────────────────────────────────────────
+// ─── Init ───
 window.addEventListener('DOMContentLoaded', () => {
   loadFromStorage();
   const key = localStorage.getItem('lp_apikey') || '';
   document.getElementById('apiKeyInput').value = key;
   updateApiStatus(key);
-  const rules = localStorage.getItem('lp_globalrules') || '';
-  document.getElementById('globalRules').value = rules;
-  const sz = localStorage.getItem('lp_size');
-  if (sz) {
-    const lbl = localStorage.getItem('lp_size_label') || sz;
-    selectSize(sz, lbl);
-  }
+  const rules = localStorage.getItem('lp_globalrules');
+  document.getElementById('globalRules').value = rules !== null ? rules : DEFAULT_GLOBAL_RULES;
   renderSectionList();
+  renderPresetList();
 });
 
-// ─────────────────────────────────────────────
-// Persistence
-// ─────────────────────────────────────────────
+function renderPresetList() {
+  const el = document.getElementById('presetList');
+  el.innerHTML = SECTION_PRESETS.map(p => `
+    <div>
+      <div class="preset-section">${p.isBanner ? '追従CTAバナー' : 'Section ' + p.id}</div>
+      <button class="preset-btn" onclick="addPreset(${p.id})">＋ ${p.name}</button>
+    </div>
+  `).join('');
+}
+
+function loadAllPresets() {
+  if (sections.length > 0) {
+    if (!confirm('現在のセクションに追加しますか？')) return;
+  }
+  SECTION_PRESETS.forEach(p => {
+    sections.push({
+      id: Date.now() + Math.random(),
+      name: p.name,
+      sectionType: p.type,
+      size: p.size,
+      isBanner: p.isBanner || false,
+      prompt: p.prompt,
+      customRules: '',
+      imageBase64: null,
+      status: 'pending'
+    });
+  });
+  saveToStorage();
+  renderSectionList();
+  showTab('sections-tab');
+  showToast(`✓ ${SECTION_PRESETS.length}件のセクションを追加しました`, 'success');
+}
+
+function addPreset(presetId) {
+  const p = SECTION_PRESETS.find(x => x.id === presetId);
+  if (!p) return;
+  sections.push({
+    id: Date.now() + Math.random(),
+    name: p.name,
+    sectionType: p.type,
+    size: p.size,
+    isBanner: p.isBanner || false,
+    prompt: p.prompt,
+    customRules: '',
+    imageBase64: null,
+    status: 'pending'
+  });
+  saveToStorage();
+  renderSectionList();
+  selectSection(sections.length - 1);
+  showTab('sections-tab');
+  showToast(`✓ ${p.name} を追加しました`, 'success');
+}
+
+// ─── Storage ───
 function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem('lp_sections');
-    if (raw) sections = JSON.parse(raw);
-  } catch(e) { sections = []; }
+  try { const r = localStorage.getItem('lp_sections'); if (r) sections = JSON.parse(r); } catch(e) { sections = []; }
 }
-function saveToStorage() {
-  localStorage.setItem('lp_sections', JSON.stringify(sections));
-}
+function saveToStorage() { localStorage.setItem('lp_sections', JSON.stringify(sections)); }
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
   localStorage.setItem('lp_apikey', key);
@@ -548,103 +519,49 @@ function updateApiStatus(key) {
   document.getElementById('apiDot').className = 'dot ' + (ok ? 'dot-ok' : 'dot-ng');
   document.getElementById('apiStatusText').textContent = ok ? '設定済み' : '未設定';
 }
-function saveGlobalRules() {
-  localStorage.setItem('lp_globalrules', document.getElementById('globalRules').value);
-}
-function selectSize(size, label) {
-  selectedSize = size;
-  selectedSizeLabel = label;
-  localStorage.setItem('lp_size', size);
-  localStorage.setItem('lp_size_label', label);
-  document.querySelectorAll('.size-opt').forEach(el => {
-    el.classList.toggle('active', el.dataset.size === size);
-  });
-  document.getElementById('sizeLabel').textContent = label;
+function saveGlobalRules() { localStorage.setItem('lp_globalrules', document.getElementById('globalRules').value); }
+function resetGlobalRules() {
+  document.getElementById('globalRules').value = DEFAULT_GLOBAL_RULES;
+  localStorage.setItem('lp_globalrules', DEFAULT_GLOBAL_RULES);
+  showToast('デフォルトに戻しました', 'success');
 }
 
-// ─────────────────────────────────────────────
-// Section management
-// ─────────────────────────────────────────────
+// ─── Section management ───
 function addSection() {
-  const idx = sections.length + 1;
-  const section = {
-    id: Date.now(),
-    name: `セクション ${idx}`,
-    sectionType: 'hero',
-    prompt: '',
-    customRules: '',
-    imageUrl: null,
-    imageBase64: null,
-    status: 'pending'
-  };
-  sections.push(section);
-  saveToStorage();
-  renderSectionList();
-  selectSection(sections.length - 1);
-  showTab('sections-tab');
+  sections.push({ id: Date.now(), name: `セクション ${sections.length + 1}`, sectionType: 'custom', size: '1024x1536', isBanner: false, prompt: '', customRules: '', imageBase64: null, status: 'pending' });
+  saveToStorage(); renderSectionList(); selectSection(sections.length - 1); showTab('sections-tab');
 }
-
 function deleteSection() {
   if (activeIdx === null) return;
   if (!confirm(`「${sections[activeIdx].name}」を削除しますか？`)) return;
-  sections.splice(activeIdx, 1);
-  activeIdx = null;
-  saveToStorage();
-  renderSectionList();
-  renderEditor();
+  sections.splice(activeIdx, 1); activeIdx = null; saveToStorage(); renderSectionList(); renderEditor();
 }
-
 function moveSection(dir) {
   if (activeIdx === null) return;
-  const newIdx = activeIdx + dir;
-  if (newIdx < 0 || newIdx >= sections.length) return;
-  [sections[activeIdx], sections[newIdx]] = [sections[newIdx], sections[activeIdx]];
-  activeIdx = newIdx;
-  saveToStorage();
-  renderSectionList();
-  renderEditor();
+  const n = activeIdx + dir;
+  if (n < 0 || n >= sections.length) return;
+  [sections[activeIdx], sections[n]] = [sections[n], sections[activeIdx]];
+  activeIdx = n; saveToStorage(); renderSectionList(); renderEditor();
 }
+function selectSection(idx) { activeIdx = idx; renderSectionList(); renderEditor(); }
 
-function selectSection(idx) {
-  activeIdx = idx;
-  renderSectionList();
-  renderEditor();
-}
-
-const SECTION_TYPES = [
-  { value: 'hero', label: 'ヒーロー（メインビジュアル）' },
-  { value: 'feature', label: '特徴・機能紹介' },
-  { value: 'benefit', label: 'ベネフィット・強み' },
-  { value: 'testimonial', label: 'お客様の声' },
-  { value: 'flow', label: '利用の流れ' },
-  { value: 'price', label: '料金プラン' },
-  { value: 'faq', label: 'よくある質問' },
-  { value: 'cta', label: 'CTA（行動喚起）' },
-  { value: 'profile', label: '会社・人物紹介' },
-  { value: 'gallery', label: 'ギャラリー・実績' },
-  { value: 'custom', label: 'カスタム' },
-];
-
-// ─────────────────────────────────────────────
-// Render
-// ─────────────────────────────────────────────
+// ─── Render ───
 function renderSectionList() {
   const list = document.getElementById('sectionList');
   if (sections.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">📄</div><div>セクションを追加して<br>LP制作を始めましょう</div></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">📄</div><div>「⚡ プリセット」タブから<br>セクションを一括追加できます</div></div>`;
     return;
   }
+  const statusMap = { done: ['status-done','✓ 完了'], pending: ['status-pending','未生成'], generating: ['status-generating','生成中'] };
   list.innerHTML = sections.map((s, i) => {
-    const statusMap = { done: ['status-done','✓ 完了'], pending: ['status-pending','未生成'], generating: ['status-generating','生成中'] };
     const [cls, label] = statusMap[s.status] || statusMap.pending;
-    return `
-    <div class="section-card ${i === activeIdx ? 'active' : ''}" onclick="selectSection(${i})">
+    return `<div class="section-card ${i === activeIdx ? 'active' : ''}" onclick="selectSection(${i})">
       <div class="section-card-header">
         <div class="section-number">${i+1}</div>
         <div class="section-name">${escHtml(s.name)}</div>
         <div class="section-status ${cls}">${label}</div>
       </div>
-      ${s.prompt ? `<div class="section-prompt-preview">${escHtml(s.prompt.substring(0,80))}${s.prompt.length>80?'…':''}</div>` : ''}
+      ${s.isBanner ? '<div class="section-prompt-preview" style="color:#FF9589">📏 横長バナーサイズ</div>' : ''}
     </div>`;
   }).join('');
 }
@@ -658,7 +575,7 @@ function renderEditor() {
   const delBtn = document.getElementById('deleteSectionBtn');
 
   if (activeIdx === null || !sections[activeIdx]) {
-    pane.innerHTML = `<div class="empty-state"><div class="icon">👈</div><div>左のリストからセクションを選ぶか<br>「＋ セクション追加」で始めましょう</div></div>`;
+    pane.innerHTML = `<div class="empty-state"><div class="icon">👈</div><div>左のリストからセクションを選んでください</div></div>`;
     previewPane.style.display = 'none';
     titleEl.textContent = 'セクションを選択してください';
     upBtn.disabled = dnBtn.disabled = delBtn.disabled = true;
@@ -671,320 +588,201 @@ function renderEditor() {
   dnBtn.disabled = activeIdx === sections.length - 1;
   delBtn.disabled = false;
 
-  const typeOptions = SECTION_TYPES.map(t => `<option value="${t.value}" ${s.sectionType===t.value?'selected':''}>${t.label}</option>`).join('');
+  const bannerNotice = s.isBanner ? `<div class="cta-banner-notice">📏 このセクションは横長バナーサイズ（追従CTA用）で生成されます</div>` : '';
 
   pane.innerHTML = `
+    ${bannerNotice}
     <div class="form-row">
-      <div class="form-group" style="flex:1.2">
+      <div class="form-group" style="flex:1.5">
         <label>セクション名</label>
-        <input type="text" value="${escHtml(s.name)}" oninput="updateSection('name', this.value)" placeholder="ヒーローセクション">
+        <input type="text" value="${escHtml(s.name)}" oninput="updateSection('name', this.value)">
       </div>
       <div class="form-group" style="flex:1">
-        <label>セクション種類</label>
-        <select onchange="updateSection('sectionType', this.value)">${typeOptions}</select>
+        <label>サイズ</label>
+        <select onchange="updateSection('size', this.value)">
+          <option value="1024x1536" ${s.size==='1024x1536'?'selected':''}>縦長9:16（スマホ）</option>
+          <option value="1536x1024" ${s.size==='1536x1024'?'selected':''}>横長（PC）</option>
+          <option value="1024x1024" ${s.size==='1024x1024'?'selected':''}>正方形</option>
+          <option value="1792x256" ${s.size==='1792x256'?'selected':''}>横長バナー（CTA）</option>
+        </select>
       </div>
     </div>
     <div class="form-group">
-      <label>プロンプト（このセクションの内容）</label>
-      <textarea rows="5" oninput="updateSection('prompt', this.value)" placeholder="例：洗練されたヒーローセクション。大きなキャッチコピー「売上を3倍にする」、サブコピー、CTAボタン。背景は青いグラデーション。">${escHtml(s.prompt)}</textarea>
+      <label>セクション内容・プロンプト</label>
+      <textarea rows="8" oninput="updateSection('prompt', this.value)">${escHtml(s.prompt)}</textarea>
     </div>
     <div class="form-group">
-      <label>追加ルール（このセクション専用・オプション）</label>
-      <textarea rows="2" oninput="updateSection('customRules', this.value)" placeholder="例：このセクションのみ写真背景を使う">${escHtml(s.customRules||'')}</textarea>
+      <label>追加ルール（このセクション専用・任意）</label>
+      <textarea rows="2" oninput="updateSection('customRules', this.value)" placeholder="このセクション専用の追加指示があれば入力">${escHtml(s.customRules||'')}</textarea>
     </div>
     <div class="editor-actions">
       <button class="btn btn-primary" onclick="generateImage(${activeIdx})" id="genBtn_${activeIdx}" ${s.status==='generating'?'disabled':''}>
         ${s.status==='generating' ? '<span class="spinner"></span> 生成中...' : '🎨 画像生成'}
       </button>
-      ${s.imageUrl||s.imageBase64 ? `<button class="btn btn-ghost btn-sm" onclick="regenerateImage(${activeIdx})">🔄 再生成</button>` : ''}
+      ${s.imageBase64 ? `<button class="btn btn-ghost btn-sm" onclick="regenerateImage(${activeIdx})">🔄 再生成</button>` : ''}
       <button class="btn btn-ghost btn-sm" onclick="buildPromptPreview(${activeIdx})">📋 プロンプト確認</button>
     </div>
   `;
 
-  // Preview
-  if (s.imageUrl || s.imageBase64) {
-    previewPane.style.display = 'flex';
-    const src = s.imageBase64 ? `data:image/png;base64,${s.imageBase64}` : s.imageUrl;
-    document.getElementById('imgContainer').innerHTML = `
-      <div class="preview-img-wrap">
-        <img src="${src}" alt="Section ${activeIdx+1}">
-      </div>`;
+  previewPane.style.display = 'flex';
+  if (s.imageBase64) {
+    const wrapClass = s.isBanner ? 'preview-img-wrap banner-wrap' : 'preview-img-wrap';
+    document.getElementById('imgContainer').innerHTML = `<div class="${wrapClass}"><img src="data:image/png;base64,${s.imageBase64}" alt="${escHtml(s.name)}"></div>`;
   } else {
-    previewPane.style.display = 'flex';
-    document.getElementById('imgContainer').innerHTML = `
-      <div class="preview-placeholder">
-        <div class="icon">🖼</div>
-        <div>画像を生成するとここに表示されます</div>
-      </div>`;
+    document.getElementById('imgContainer').innerHTML = `<div class="preview-placeholder"><div class="icon">🖼</div><div>画像を生成するとここに表示されます</div></div>`;
   }
 }
 
-// ─────────────────────────────────────────────
-// Update helpers
-// ─────────────────────────────────────────────
 function updateSection(field, value) {
   if (activeIdx === null) return;
   sections[activeIdx][field] = value;
-  if (field === 'name') {
-    document.getElementById('editorTitle').textContent = `${activeIdx + 1}. ${value}`;
-    renderSectionList();
-  }
+  if (field === 'name') { document.getElementById('editorTitle').textContent = `${activeIdx + 1}. ${value}`; renderSectionList(); }
   saveToStorage();
 }
 
-// ─────────────────────────────────────────────
-// Prompt builder
-// ─────────────────────────────────────────────
+// ─── Prompt builder ───
 function buildFullPrompt(idx) {
   const s = sections[idx];
-  const globalRules = (localStorage.getItem('lp_globalrules') || '').trim();
-  const sectionType = SECTION_TYPES.find(t => t.value === s.sectionType)?.label || s.sectionType;
+  const globalRules = (localStorage.getItem('lp_globalrules') || DEFAULT_GLOBAL_RULES).trim();
   let parts = [];
-  parts.push(`商用LPの「${sectionType}」セクションの画像を生成してください。`);
-  if (globalRules) parts.push(`【共通スタイルルール】\n${globalRules}`);
-  if (s.prompt) parts.push(`【このセクションの内容】\n${s.prompt}`);
-  if (s.customRules) parts.push(`【このセクション専用の追加ルール】\n${s.customRules}`);
-  parts.push('画像はLP用の横幅いっぱいのバナー形式で、実際のWebページに使用できる高品質なデザインにしてください。テキストや要素の配置はWebデザインの慣例に従ってください。');
+  parts.push(`あなたは日本のトップクラス資格スクールのプロLPデザイナーです。以下の仕様に基づき、高品質なLP画像を生成してください。`);
+  parts.push(`【共通スタイルルール・ブランドガイドライン】\n${globalRules}`);
+  parts.push(`【このセクションの仕様】\n${s.prompt}`);
+  if (s.customRules) parts.push(`【追加指示】\n${s.customRules}`);
+  parts.push(`フォント：全てゴシック体（Noto Sans JP相当）で、日本語テキストを正確に描画してください。文字化け・崩れなし。重要数字はアクセントカラーで強調。CTAボタンは描画しないこと。`);
   return parts.join('\n\n');
 }
 
 function buildPromptPreview(idx) {
-  const prompt = buildFullPrompt(idx);
-  alert('【送信されるプロンプト】\n\n' + prompt);
+  alert('【送信されるプロンプト】\n\n' + buildFullPrompt(idx));
 }
 
-// ─────────────────────────────────────────────
-// Image generation
-// ─────────────────────────────────────────────
+// ─── Image generation ───
 async function generateImage(idx) {
   const apiKey = localStorage.getItem('lp_apikey') || '';
-  if (!apiKey.startsWith('sk-')) {
-    showToast('APIキーを設定してください（設定タブ）', 'error');
-    showTab('settings-tab');
-    return;
-  }
-  if (!sections[idx].prompt.trim()) {
-    showToast('プロンプトを入力してください', 'error');
-    return;
-  }
+  if (!apiKey.startsWith('sk-')) { showToast('APIキーを設定してください', 'error'); showTab('settings-tab'); return; }
+  if (!sections[idx].prompt.trim()) { showToast('プロンプトを入力してください', 'error'); return; }
 
   sections[idx].status = 'generating';
-  saveToStorage();
-  renderSectionList();
-  renderEditor();
+  saveToStorage(); renderSectionList(); renderEditor();
 
   const prompt = buildFullPrompt(idx);
-  const [width, height] = selectedSize.split('x').map(Number);
+  const size = sections[idx].size || '1024x1536';
+
+  // For banner size, use closest supported size
+  const apiSize = size === '1792x256' ? '1536x1024' : size;
 
   try {
     const res = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-image-1',
-        prompt: prompt,
-        n: 1,
-        size: selectedSize,
-        output_format: 'b64_json'
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize, output_format: 'b64_json' })
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
-
+    if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
     const data = await res.json();
     const b64 = data.data?.[0]?.b64_json;
     if (!b64) throw new Error('画像データが取得できませんでした');
 
     sections[idx].imageBase64 = b64;
-    sections[idx].imageUrl = null;
     sections[idx].status = 'done';
-    saveToStorage();
-    renderSectionList();
-    renderEditor();
-    showToast(`✓ セクション${idx+1}の生成完了！`, 'success');
-
+    saveToStorage(); renderSectionList(); renderEditor();
+    showToast(`✓ ${sections[idx].name} の生成完了！`, 'success');
   } catch(e) {
     sections[idx].status = 'pending';
-    saveToStorage();
-    renderSectionList();
-    renderEditor();
+    saveToStorage(); renderSectionList(); renderEditor();
     showToast('生成エラー: ' + e.message, 'error');
-    console.error(e);
   }
 }
 
 function regenerateImage(idx) {
-  if (!confirm('この画像を再生成しますか？現在の画像は上書きされます。')) return;
+  if (!confirm('再生成しますか？現在の画像は上書きされます。')) return;
   sections[idx].imageBase64 = null;
-  sections[idx].imageUrl = null;
   saveToStorage();
   generateImage(idx);
 }
 
-// ─────────────────────────────────────────────
-// LP Preview
-// ─────────────────────────────────────────────
+// ─── LP Preview ───
 function renderLPPreview() {
   const container = document.getElementById('lpPreview');
-  if (sections.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📄</div><div>セクションがまだありません</div></div>`;
-    return;
-  }
+  if (sections.length === 0) { container.innerHTML = `<div class="empty-state"><div class="icon">📄</div><div>セクションがありません</div></div>`; return; }
   container.innerHTML = sections.map((s, i) => {
-    if (s.imageBase64 || s.imageUrl) {
-      const src = s.imageBase64 ? `data:image/png;base64,${s.imageBase64}` : s.imageUrl;
-      return `<div class="lp-section-wrap">
-        <img class="lp-section-img" src="${src}" alt="${escHtml(s.name)}">
-        <div class="lp-section-overlay">${i+1}. ${escHtml(s.name)}</div>
-      </div>`;
-    } else {
-      return `<div class="lp-section-wrap">
-        <div style="background:var(--surface2);border:2px dashed var(--border);padding:40px;text-align:center;color:var(--text2);max-width:600px;width:100%">
-          ${i+1}. ${escHtml(s.name)} — 未生成
-        </div>
-      </div>`;
+    if (s.imageBase64) {
+      const wrapClass = s.isBanner ? 'lp-section-wrap banner-wrap' : 'lp-section-wrap';
+      return `<div class="${wrapClass}"><img class="lp-section-img" src="data:image/png;base64,${s.imageBase64}" alt="${escHtml(s.name)}"><div class="lp-section-overlay">${i+1}. ${escHtml(s.name)}</div></div>`;
     }
+    return `<div class="lp-section-wrap"><div style="background:var(--surface2);border:2px dashed var(--border);padding:40px;text-align:center;color:var(--text2);max-width:390px;width:100%">${i+1}. ${escHtml(s.name)} — 未生成</div></div>`;
   }).join('');
 }
 
-// ─────────────────────────────────────────────
-// Export
-// ─────────────────────────────────────────────
+// ─── Export ───
 function exportLP() {
-  const hasSections = sections.some(s => s.imageBase64 || s.imageUrl);
-  if (!hasSections) {
-    showToast('生成済みの画像がありません', 'error');
-    return;
-  }
+  const hasSections = sections.some(s => s.imageBase64);
+  if (!hasSections) { showToast('生成済みの画像がありません', 'error'); return; }
   const imagesHtml = sections.map((s, i) => {
-    if (!s.imageBase64 && !s.imageUrl) return `<!-- Section ${i+1}: ${s.name} - 未生成 -->`;
-    const src = s.imageBase64 ? `data:image/png;base64,${s.imageBase64}` : s.imageUrl;
-    return `  <!-- ${i+1}. ${s.name} -->\n  <img src="${src}" alt="${escHtml(s.name)}" style="width:100%;display:block;">`;
+    if (!s.imageBase64) return `<!-- ${i+1}. ${s.name} - 未生成 -->`;
+    return `  <!-- ${i+1}. ${s.name} -->\n  <img src="data:image/png;base64,${s.imageBase64}" alt="${escHtml(s.name)}" style="width:100%;display:block;">`;
   }).join('\n');
-
-  const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Landing Page</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #fff; }
-    .lp-container { max-width: 1200px; margin: 0 auto; }
-    img { width: 100%; display: block; }
-  </style>
-</head>
-<body>
-  <div class="lp-container">
-${imagesHtml}
-  </div>
-</body>
-</html>`;
-
+  const html = `<!DOCTYPE html>\n<html lang="ja">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1.0">\n  <title>フォーサイト行政書士LP</title>\n  <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;max-width:390px;margin:0 auto}img{width:100%;display:block}</style>\n</head>\n<body>\n${imagesHtml}\n</body>\n</html>`;
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'landing-page.html';
-  a.click();
+  const a = document.createElement('a'); a.href = url; a.download = 'foresight-lp.html'; a.click();
   URL.revokeObjectURL(url);
   showToast('✓ HTMLをエクスポートしました', 'success');
 }
 
 function exportData() {
-  const data = {
-    version: 1,
-    globalRules: localStorage.getItem('lp_globalrules') || '',
-    size: selectedSize,
-    sections: sections.map(s => ({ ...s }))
-  };
+  const data = { version: 2, globalRules: localStorage.getItem('lp_globalrules') || '', sections };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `lp-project-${Date.now()}.json`;
-  a.click();
+  const a = document.createElement('a'); a.href = url; a.download = `foresight-lp-${Date.now()}.json`; a.click();
   URL.revokeObjectURL(url);
   showToast('✓ プロジェクトを保存しました', 'success');
 }
 
 function importData(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
     try {
       const data = JSON.parse(ev.target.result);
       if (data.sections) {
-        if (!confirm(`${data.sections.length}件のセクションをインポートします。現在のデータは上書きされます。`)) return;
+        if (!confirm(`${data.sections.length}件をインポートします。現在のデータは上書きされます。`)) return;
         sections = data.sections;
-        if (data.globalRules) {
-          localStorage.setItem('lp_globalrules', data.globalRules);
-          document.getElementById('globalRules').value = data.globalRules;
-        }
-        if (data.size) selectSize(data.size, data.size);
-        saveToStorage();
-        activeIdx = null;
-        renderSectionList();
-        renderEditor();
+        if (data.globalRules) { localStorage.setItem('lp_globalrules', data.globalRules); document.getElementById('globalRules').value = data.globalRules; }
+        saveToStorage(); activeIdx = null; renderSectionList(); renderEditor();
         showToast(`✓ ${sections.length}件をインポートしました`, 'success');
       }
-    } catch(err) { showToast('インポートエラー: JSONが無効です', 'error'); }
+    } catch(err) { showToast('インポートエラー', 'error'); }
   };
-  reader.readAsText(file);
-  e.target.value = '';
+  reader.readAsText(file); e.target.value = '';
 }
 
 function clearAll() {
-  if (!confirm('全セクションを削除しますか？この操作は元に戻せません。')) return;
-  sections = [];
-  activeIdx = null;
-  saveToStorage();
-  renderSectionList();
-  renderEditor();
+  if (!confirm('全セクションを削除しますか？')) return;
+  sections = []; activeIdx = null; saveToStorage(); renderSectionList(); renderEditor();
   showToast('全セクションを削除しました');
 }
 
-function applyGlobalRulesToAll() {
-  showToast('共通ルールは次回の生成時に自動で適用されます ✓', 'success');
-}
-
-// ─────────────────────────────────────────────
-// UI helpers
-// ─────────────────────────────────────────────
+// ─── UI helpers ───
 function showTab(id) {
   document.querySelectorAll('.panel-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.getElementById(id + '-btn').classList.add('active');
 }
-
 function showMainView(id) {
   document.getElementById('editor-view').style.display = id === 'editor-view' ? 'flex' : 'none';
   document.getElementById('lp-preview-view').style.display = id === 'lp-preview-view' ? 'flex' : 'none';
   if (id === 'lp-preview-view') renderLPPreview();
 }
-
 let toastTimer;
 function showToast(msg, type = '') {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show' + (type ? ' ' + type : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+  el.textContent = msg; el.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.className = ''; }, 3000);
 }
-
-function escHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function escHtml(str) { if (!str) return ''; return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 </script>
 </body>
 </html>
