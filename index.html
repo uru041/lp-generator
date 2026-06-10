@@ -904,7 +904,7 @@ async function generateImage(idx) {
       const res = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize, output_format: 'b64_json' })
+        body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: apiSize })
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || `HTTP ${res.status}`); }
       const data = await res.json();
