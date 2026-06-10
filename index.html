@@ -192,7 +192,7 @@
       <h2>📋 生成プロンプト</h2>
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="copyAll()">全体コピー</button>
-        <button class="btn btn-success btn-sm" onclick="copyActive()">選択中をコピー</button>
+        <button class="btn btn-success btn-sm" id="copyActiveBtn" onclick="copyActive()">選択中をコピー</button>
       </div>
     </div>
     <div class="prompt-output" id="promptOutput">
@@ -380,12 +380,14 @@ function showView(view) {
     title.textContent = 'Layer 1：基本ルール（全LP共通）';
     ctrl.style.display = 'none';
     body.innerHTML = renderLayer1Form();
+    document.getElementById('copyActiveBtn').textContent = '① L1をコピー';
     renderSectionList();
     renderPromptOutput();
   } else if (view === 'layer2') {
     title.textContent = 'Layer 2：LP個別設定';
     ctrl.style.display = 'none';
     body.innerHTML = renderLayer2Form();
+    document.getElementById('copyActiveBtn').textContent = '② L2をコピー';
     initTagInputs();
     renderSectionList();
     renderPromptOutput();
@@ -398,6 +400,7 @@ function showView(view) {
     document.getElementById('moveDownBtn').disabled = idx === sections.length - 1;
     document.getElementById('delSectionBtn').disabled = false;
     body.innerHTML = renderSectionForm(idx);
+    document.getElementById('copyActiveBtn').textContent = '③ セクションをコピー';
     renderSectionList();
     renderPromptOutput();
   }
@@ -791,9 +794,13 @@ function renderPromptOutput() {
 // ─── Copy ───
 function copyActive() {
   let text = '';
-  if (activeView === 'layer1') text = buildLayer1Text();
-  else if (activeView === 'layer2') text = buildLayer2Text();
-  else {
+  if (activeView === 'layer1') {
+    text = buildLayer1Text() + '\n\n' +
+      `以上がベースルールです。次にLP個別の情報をお伝えします。「了解しました。LP情報をお知らせください。」とだけ返答してください。質問や画像生成はまだ行わないでください。`;
+  } else if (activeView === 'layer2') {
+    text = buildLayer2Text() + '\n\n' +
+      `以上がLP個別情報です。次に各セクションの情報を順番にお伝えします。「了解しました。セクション情報をお知らせください。」とだけ返答してください。まだ画像生成は行わないでください。`;
+  } else {
     const idx = parseInt(activeView);
     if (!isNaN(idx)) text = buildFullPrompt(idx);
   }
