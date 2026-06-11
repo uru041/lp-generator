@@ -869,8 +869,14 @@ function copyActive() {
   navigator.clipboard.writeText(text).then(() => showToast('✓ コピーしました！ChatGPTに貼り付けてください', 'success'));
 }
 function copyAll() {
-  const all = sections.map((s,i) => `【セクション${i+1}：${s.name}】\n${buildFullPrompt(i)}`).join('\n\n' + '═'.repeat(50) + '\n\n');
-  navigator.clipboard.writeText(all || layer1).then(() => showToast('✓ 全プロンプトをコピーしました', 'success'));
+  const sep = '\n\n' + '═'.repeat(50) + '\n\n';
+  let parts = [];
+  parts.push(buildLayer1Text() + '\n\n以上がベースルールです。次にLP個別の情報をお伝えします。「了解しました。LP情報をお知らせください。」とだけ返答してください。質問や画像生成はまだ行わないでください。');
+  parts.push(buildLayer2Text() + '\n\n以上がLP個別情報です。次に各セクションの情報を順番にお伝えします。「了解しました。セクション情報をお知らせください。」とだけ返答してください。まだ画像生成は行わないでください。');
+  sections.forEach((s, i) => {
+    parts.push(`では以下のセクションの画像生成をお願いします。\n\n【セクション${i+1}：${s.name}】\n${buildSectionText(s)}`);
+  });
+  navigator.clipboard.writeText(parts.join(sep)).then(() => showToast('✓ 全プロンプトをコピーしました', 'success'));
 }
 
 // ─── Export/Import ───
@@ -918,4 +924,3 @@ function escHtml(str) {
 </script>
 </body>
 </html>
- 
